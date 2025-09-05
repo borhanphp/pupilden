@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('duration')->nullable();
             $table->string('level')->nullable();
             $table->string('language')->nullable();
-            $table->foreignId('category_id')->nullable()->constrained('course_categories')->nullOnDelete();
-            $table->foreignId('subcategory_id')->nullable()->constrained('course_sub_categories')->nullOnDelete();
+            $table->foreignId('course_category_id')->nullable()->constrained('course_categories')->nullOnDelete();
+            $table->foreignId('course_sub_category_id')->nullable()->constrained('course_sub_categories')->nullOnDelete();
             $table->string('tags')->nullable();
             $table->string('keywords')->nullable();
             $table->string('image')->nullable();

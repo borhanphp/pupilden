@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('course_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('video_url');
-            $table->enum('video_type', ['s3', 'youtube']);
+            $table->integer('video_type')->default(1)->comment('0: s3, 1: youtube'); // 0: s3, 1: youtube
             $table->integer('duration')->nullable(); // in seconds
             $table->boolean('is_preview')->default(false);
             $table->integer('order')->default(0);

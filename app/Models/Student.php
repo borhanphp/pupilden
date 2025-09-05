@@ -22,4 +22,28 @@ class Student extends Authenticatable
     ];
 
     protected $hidden = ['password'];
+
+    /**
+     * Get the organization that owns the student
+     */
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    /**
+     * Get the courses that the student is enrolled in
+     */
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_students');
+    }
+
+    /**
+     * Get the course purchases made by the student
+     */
+    public function coursePurchases()
+    {
+        return $this->hasMany(CoursePurchase::class);
+    }
 }

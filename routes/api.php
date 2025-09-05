@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Student\StudentAuthController;
+use App\Http\Controllers\Api\Student\CourseController;
+use App\Http\Controllers\Api\Student\CoursePurchaseController;
+use App\Http\Controllers\Api\PublicCourseController;
 
 // Admin API (default users)
 Route::middleware('auth:sanctum')->group(function () {
@@ -20,5 +23,30 @@ Route::prefix('student')->group(function () {
         Route::get('/me', [StudentAuthController::class, 'me']);
         Route::post('/logout', [StudentAuthController::class, 'logout']);
         
+        // Course routes
+        Route::get('/courses', [CourseController::class, 'index']);
+        Route::get('/courses/featured', [CourseController::class, 'featured']);
+        Route::get('/courses/single/{id}', [CourseController::class, 'show']);
+        Route::get('/courses/categories', [CourseController::class, 'categories']);
+        Route::get('/courses/category/{categoryId}', [CourseController::class, 'byCategory']);
+        Route::get('/courses/search', [CourseController::class, 'search']);
+        Route::get('/courses/statistics', [CourseController::class, 'statistics']);
+        
+        // Course purchase routes
+        Route::post('/courses/purchase', [CoursePurchaseController::class, 'purchase']);
+        Route::post('/courses/validate-coupon', [CoursePurchaseController::class, 'validateCoupon']);
+        Route::get('/courses/available-coupons', [CoursePurchaseController::class, 'availableCoupons']);
+        Route::get('/purchases', [CoursePurchaseController::class, 'purchaseHistory']);
     });
 });
+
+
+
+// Public Course routes
+Route::get('/courses', [PublicCourseController::class, 'index']);
+Route::get('/courses/featured', [PublicCourseController::class, 'featured']);
+Route::get('/courses/single/{id}', [PublicCourseController::class, 'show']);
+Route::get('/courses/categories', [PublicCourseController::class, 'categories']);
+Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
+Route::get('/courses/search', [PublicCourseController::class, 'search']);
+Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);

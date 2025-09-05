@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('course_sub_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained('course_categories')->onDelete('cascade');
+            $table->foreignId('organization_id')->nullable()->constrained()->nullOnDelete(); // optional if categories vary per org
+            $table->foreignId('course_category_id')->constrained('course_categories')->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
