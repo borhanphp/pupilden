@@ -12,6 +12,7 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\CourseModuleController;
 
 
 
@@ -38,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('coupons', CouponController::class);
         Route::post('coupons/{coupon}/toggle-active', [CouponController::class, 'toggleActive'])->name('coupons.toggle-active');
         Route::post('coupons/{coupon}/duplicate', [CouponController::class, 'duplicate'])->name('coupons.duplicate');
+        Route::resource('course-modules', CourseModuleController::class);
+        Route::post('course-modules/update-order', [CourseModuleController::class, 'updateOrder'])->name('course-modules.update-order');
+        Route::post('course-modules/{courseModule}/toggle-status', [CourseModuleController::class, 'toggleStatus'])->name('course-modules.toggle-status');
 });
 
 
