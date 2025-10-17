@@ -40,10 +40,13 @@
                             <div class="form-group">
                                 <label for="Password" class="form-label">Password</label>
                                 <div class="position-relative">
-                                    <input id="Password" type="password" placeholder="Enter Password" class="form-control ps-5" name="password" value="" />
+                                    <input id="Password" type="password" placeholder="Enter Password" class="form-control ps-5 pe-5" name="password" value="" />
                                     <span class="position-absolute top-50 start-0 translate-middle-y ms-3">
                                         <i class="fas fa-lock fa-sm"></i>
                                     </span>
+                                    <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-3 p-0" onclick="togglePassword()" style="border: none; background: none;">
+                                        <i id="passwordToggleIcon" class="fas fa-eye fa-sm text-muted"></i>
+                                    </button>
                                 </div>
                                 @error('password')
                                     <div class="alert alert-danger mt-2">
@@ -66,4 +69,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('Password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 @endsection

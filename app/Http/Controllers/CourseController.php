@@ -180,17 +180,17 @@ class CourseController extends Controller
             // Handle image upload
             if ($request->hasFile('image')) {
                 $folder = auth()->user()->organization_id . '/course_images';
-                if (!Storage::disk('root_public')->exists($folder)) {
-                    Storage::disk('root_public')->makeDirectory($folder);
+                if (!Storage::disk('public')->exists($folder)) {
+                    Storage::disk('public')->makeDirectory($folder);
                 }
                 
                 // Delete old image if exists
-                if ($course->image && Storage::disk('root_public')->exists($folder . '/' . $course->image)) {
-                    Storage::disk('root_public')->delete($folder . '/' . $course->image);
+                if ($course->image && Storage::disk('public')->exists($folder . '/' . $course->image)) {
+                    Storage::disk('public')->delete($folder . '/' . $course->image);
                 }
                 
                 $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->storeAs($folder, $imageName, 'root_public');
+                $request->file('image')->storeAs($folder, $imageName, 'public');
                 $data['image'] = $imageName;
             }
 
@@ -219,8 +219,8 @@ class CourseController extends Controller
             // Delete course image if exists
             if ($course->image) {
                 $folder = auth()->user()->organization_id . '/course_images';
-                if (Storage::disk('root_public')->exists($folder . '/' . $course->image)) {
-                    Storage::disk('root_public')->delete($folder . '/' . $course->image);
+                if (Storage::disk('public')->exists($folder . '/' . $course->image)) {
+                    Storage::disk('public')->delete($folder . '/' . $course->image);
                 }
             }
 

@@ -105,4 +105,12 @@ class Course extends Model
             ->where('payment_status', 'completed')
             ->exists();
     }
+
+    /**
+     * Get the course modules for this course
+     */
+    public function modules()
+    {
+        return $this->hasMany(CourseModule::class);
+    }
 }

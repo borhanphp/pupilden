@@ -13,6 +13,8 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CourseModuleController;
+use App\Http\Controllers\CourseModuleFileController;
+use App\Http\Controllers\StudentController;
 
 
 
@@ -42,6 +44,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('course-modules', CourseModuleController::class);
         Route::post('course-modules/update-order', [CourseModuleController::class, 'updateOrder'])->name('course-modules.update-order');
         Route::post('course-modules/{courseModule}/toggle-status', [CourseModuleController::class, 'toggleStatus'])->name('course-modules.toggle-status');
+        Route::resource('course-module-files', CourseModuleFileController::class);
+        Route::get('course-module-files/{courseModuleFile}/download', [CourseModuleFileController::class, 'download'])->name('course-module-files.download');
+        Route::resource('students', StudentController::class);
+        Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
+        Route::post('students/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('students.toggle-status');
+        Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');
+        Route::get('students/{student}/statistics', [StudentController::class, 'statistics'])->name('students.statistics');
+        Route::post('course-purchases/{purchase}/update-status', [StudentController::class, 'updatePaymentStatus'])->name('course-purchases.update-status');
 });
 
 

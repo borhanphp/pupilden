@@ -38,4 +38,12 @@ class CourseModule extends Model
     {
         return $this->hasMany(CourseModuleFile::class);
     }
+
+    /**
+     * Get the videos for this course module
+     */
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
 }

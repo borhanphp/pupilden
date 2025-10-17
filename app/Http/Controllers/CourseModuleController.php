@@ -30,10 +30,15 @@ class CourseModuleController extends Controller
             });
         }
 
-        $courseModules = $query->orderBy('order')->paginate(15);
+        $courseModules = $query->orderBy('order');
         $courses = Course::where('is_active', true)->get();
-
-        return view('course-modules.index', compact('courseModules', 'courses'));
+        // check if request is ajax
+        if ($request->ajax()) {
+            return response()->json($courseModules->get());
+        } else {
+            $courseModules = $courseModules->paginate(15);
+            return view('course-modules.index', compact('courseModules', 'courses'));
+        }
     }
 
     /**
@@ -60,7 +65,7 @@ class CourseModuleController extends Controller
             'status' => 'required|in:active,inactive',
             'order' => 'nullable|integer|min:0',
             'duration' => 'nullable|integer|min:0',
-            'duration_type' => 'nullable|in:minutes,hours,days',
+            'duration_type' => 'nullable|in:0,1,2',
             'duration_value' => 'nullable|integer|min:0',
         ]);
 
@@ -68,14 +73,16 @@ class CourseModuleController extends Controller
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
 
-        // Handle image upload
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->storeAs('course-modules', $imageName, 'public');
-            $data['image'] = $imagePath;
+            $folder = auth()->user()->organization_id . '/course_modules';
+            if (!Storage::disk('public')->exists($folder)) {
+                Storage::disk('public')->makeDirectory($folder);
+            }
+            $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $data['image'] = $imageName;
         }
-
+        
         // Set default order if not provided
         if (!isset($data['order'])) {
             $maxOrder = CourseModule::where('course_id', $data['course_id'])->max('order');
@@ -121,7 +128,7 @@ class CourseModuleController extends Controller
             'status' => 'required|in:active,inactive',
             'order' => 'nullable|integer|min:0',
             'duration' => 'nullable|integer|min:0',
-            'duration_type' => 'nullable|in:minutes,hours,days',
+            'duration_type' => 'nullable|in:0,1,2',
             'duration_value' => 'nullable|integer|min:0',
         ]);
 
@@ -130,15 +137,19 @@ class CourseModuleController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($courseModule->image && Storage::disk('public')->exists($courseModule->image)) {
-                Storage::disk('public')->delete($courseModule->image);
+            $folder = auth()->user()->organization_id . '/course_modules';
+            if (!Storage::disk('public')->exists($folder)) {
+                Storage::disk('public')->makeDirectory($folder);
             }
-
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->storeAs('course-modules', $imageName, 'public');
-            $data['image'] = $imagePath;
+            
+            // Delete old image if exists
+            if ($courseModule->image && Storage::disk('public')->exists($folder . '/' . $courseModule->image)) {
+                Storage::disk('public')->delete($folder . '/' . $courseModule->image);
+            }
+            
+            $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
+            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $data['image'] = $imageName;
         }
 
         $courseModule->update($data);
@@ -153,8 +164,8 @@ class CourseModuleController extends Controller
     public function destroy(CourseModule $courseModule)
     {
         // Delete associated image if exists
-        if ($courseModule->image && Storage::disk('public')->exists($courseModule->image)) {
-            Storage::disk('public')->delete($courseModule->image);
+        if ($courseModule->image && Storage::disk('public')->exists(auth()->user()->organization_id . '/course_modules/' . $courseModule->image)) {
+            Storage::disk('public')->delete(auth()->user()->organization_id . '/course_modules/' . $courseModule->image);
         }
 
         $courseModule->delete();

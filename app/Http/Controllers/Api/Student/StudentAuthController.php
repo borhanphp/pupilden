@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
+use App\Mail\PasswordResetLink;
 
 class StudentAuthController extends BaseController
 {
@@ -112,6 +115,64 @@ class StudentAuthController extends BaseController
             return $this->success('Student profile', ['student' => $student]);
         }catch(\Exception $e){
             return $this->error('Student profile update failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function change_password(Request $request)
+    {
+        try{
+            $request->validate([
+                'old_password' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed',
+            ]);
+            $student = $request->user('student');
+            if(!Hash::check($request->old_password, $student->password)){
+                return $this->error('Old password is incorrect', ['error' => 'Old password is incorrect']);
+            }
+            $student->password = Hash::make($request->new_password);
+            $student->save();
+            return $this->success('Password changed successfully', ['student' => $student]);
+        }
+        catch(\Exception $e){
+            return $this->error('Password change failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function reset_password(Request $request)
+    {
+        try{
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+            $student = Student::where('email', $request->email)->first();
+            if(!$student){
+                return $this->error('Student not found', ['error' => 'Student not found']);
+            }
+            $student->password = Hash::make($request->new_password);
+            $student->save();
+            return $this->success('Password reset successfully', ['student' => $student]);
+        }catch(\Exception $e){
+            return $this->error('Password reset failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /* send password reset tockern to email */
+    public function send_password_reset_token(Request $request)
+    {
+        try{
+            $request->validate([
+                'email' => 'required|email',
+            ]);
+            $student = Student::where('email', $request->email)->first();
+            if(!$student){
+                return $this->error('Student not found', ['error' => 'Student not found']);
+            }
+            $token = Password::createToken($student);
+            Mail::to($student->email)->send(new PasswordResetLink($token, $student));
+            return $this->success('Password reset token sent successfully', ['message' => 'Password reset link has been sent to your email']);
+        }
+        catch(\Exception $e){
+            return $this->error('Password reset token send failed', ['error' => $e->getMessage()]);
         }
     }
 }

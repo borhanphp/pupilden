@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Student\StudentAuthController;
 use App\Http\Controllers\Api\Student\CourseController;
 use App\Http\Controllers\Api\Student\CoursePurchaseController;
+use App\Http\Controllers\Api\Student\PurchasedCourceController;
 use App\Http\Controllers\Api\PublicCourseController;
 
 // Admin API (default users)
@@ -37,6 +38,13 @@ Route::prefix('student')->group(function () {
         Route::post('/courses/validate-coupon', [CoursePurchaseController::class, 'validateCoupon']);
         Route::get('/courses/available-coupons', [CoursePurchaseController::class, 'availableCoupons']);
         Route::get('/purchases', [CoursePurchaseController::class, 'purchaseHistory']);
+        
+        // Purchased courses routes
+        Route::get('/purchased-courses', [PurchasedCourceController::class, 'index']);
+        Route::get('/purchased-courses/{courseId}', [PurchasedCourceController::class, 'show']);
+        Route::get('/purchased-courses/{courseId}/modules', [PurchasedCourceController::class, 'modules']);
+        Route::get('/purchased-courses/{courseId}/module-videos', [PurchasedCourceController::class, 'moduleVideos']);
+        Route::get('/purchased-courses/{courseId}/modules/{moduleId}/videos', [PurchasedCourceController::class, 'moduleVideosByModule']);
     });
 });
 
