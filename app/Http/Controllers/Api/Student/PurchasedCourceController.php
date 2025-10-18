@@ -666,4 +666,9 @@ class PurchasedCourceController extends Controller
         
         return round($bytes, 2) . ' ' . $units[$pow];
     }
+
+    /**
+     * store video watch history
+     */
+    
 }

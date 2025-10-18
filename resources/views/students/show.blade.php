@@ -148,28 +148,28 @@
                                 <div class="card-body">
                                     <div class="row text-center">
                                         <div class="col-6">
-                                            <h5 class="text-primary">{{ $student->courses->count() }}</h5>
+                                            <h5 class="text-primary">{{ $student->courses?->count() }}</h5>
                                             <small class="text-muted">Courses</small>
                                         </div>
                                         <div class="col-6">
-                                            <h5 class="text-success">{{ $student->coursePurchases->count() }}</h5>
+                                            <h5 class="text-success">{{ $student->coursePurchases?->count() }}</h5>
                                             <small class="text-muted">Purchases</small>
                                         </div>
                                     </div>
                                     <hr>
                                     <div class="row text-center">
                                         <div class="col-6">
-                                            <h5 class="text-success">{{ $student->coursePurchases->where('payment_status', 'completed')->count() }}</h5>
+                                            <h5 class="text-success">{{ $student->coursePurchases?->where('payment_status', 'completed')->count() }}</h5>
                                             <small class="text-muted">Completed</small>
                                         </div>
                                         <div class="col-6">
-                                            <h5 class="text-warning">{{ $student->coursePurchases->where('payment_status', 'pending')->count() }}</h5>
+                                            <h5 class="text-warning">{{ $student->coursePurchases?->where('payment_status', 'pending')->count() }}</h5>
                                             <small class="text-muted">Pending</small>
                                         </div>
                                     </div>
                                     <hr>
                                     <div class="text-center">
-                                        <h5 class="text-info">${{ number_format($student->coursePurchases->where('payment_status', 'completed')->sum('final_price'), 2) }}</h5>
+                                        <h5 class="text-info">${{ number_format($student->coursePurchases?->where('payment_status', 'completed')->sum('final_price'), 2) }}</h5>
                                         <small class="text-muted">Total Spent</small>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@
                     </div>
 
                     <!-- Enrolled Courses -->
-                    @if($student->courses->count() > 0)
+                    @if($student->courses?->count() > 0)
                         <div class="row mt-4">
                             <div class="col-md-12">
                                 <h5>Enrolled Courses</h5>
@@ -220,7 +220,7 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <small class="text-muted">{{ $course->pivot->created_at->format('M d, Y') }}</small>
+                                                        <small class="text-muted">{{ $course->pivot?->created_at?->format('M d, Y') }}</small>
                                                     </td>
                                                     <td>
                                                         <a href="{{ route('courses.show', $course) }}" class="btn btn-sm btn-outline-info">

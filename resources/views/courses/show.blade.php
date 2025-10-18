@@ -232,7 +232,7 @@
                                                             <td>{{ $student->name }}</td>
                                                             <td>{{ $student->username }}</td>
                                                             <td>{{ $student->email }}</td>
-                                                            <td>{{ $student->pivot->created_at->format('M j, Y') }}</td>
+                                                            <td>{{ $student->pivot?->created_at?->format('M j, Y') }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>

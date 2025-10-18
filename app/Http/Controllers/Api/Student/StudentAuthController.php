@@ -40,6 +40,7 @@ class StudentAuthController extends BaseController
                 'email' => $request->email,
                 'contact_number' => $request->contact_number,
                 'password' => bcrypt($request->password),
+                'is_active' => true,
             ]);
 
             return $this->success('Student created successfully', ['student' => $student]);
@@ -61,6 +62,10 @@ class StudentAuthController extends BaseController
         $student = Student::where('organization_id', $domain->organization_id)
             ->where('username', $request->username)
             ->first();
+
+        if(!$student->is_active){
+            return $this->error('Student is not active', ['error' => 'Student is not active']);
+        }
 
         if (! $student || ! Hash::check($request->password, $student->password)) {
             throw ValidationException::withMessages([

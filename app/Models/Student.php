@@ -13,6 +13,7 @@ class Student extends Authenticatable
         'organization_id',
         'username',
         'email',
+        'is_active',
         'password',
         'name',
         'profile_picture',
