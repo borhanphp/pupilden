@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('slug');
             $table->text('description')->nullable();
             $table->string('duration')->nullable();
             $table->string('level')->nullable();
@@ -34,6 +34,9 @@ return new class extends Migration
             $table->string('updated_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            
+            // Composite unique constraint: slug must be unique per organization
+            $table->unique(['organization_id', 'slug']);
         });
     }
 

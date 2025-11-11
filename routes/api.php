@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Student\StudentAuthController;
 use App\Http\Controllers\Api\Student\CourseController;
 use App\Http\Controllers\Api\Student\CoursePurchaseController;
+use App\Http\Controllers\Api\Student\ExamAttemptController;
+use App\Http\Controllers\Api\Student\AIExamGradingController;
 use App\Http\Controllers\Api\Student\PurchasedCourceController;
 use App\Http\Controllers\Api\PublicCourseController;
 
@@ -38,6 +40,16 @@ Route::prefix('student')->group(function () {
         Route::post('/courses/validate-coupon', [CoursePurchaseController::class, 'validateCoupon']);
         Route::get('/courses/available-coupons', [CoursePurchaseController::class, 'availableCoupons']);
         Route::get('/purchases', [CoursePurchaseController::class, 'purchaseHistory']);
+        
+        // Exam attempt routes
+        Route::post('/exam-attempts/start', [ExamAttemptController::class, 'start']);
+        Route::post('/exam-attempts/{attemptId}/submit-answer', [ExamAttemptController::class, 'submitAnswer']);
+        Route::post('/exam-attempts/{attemptId}/submit-exam', [ExamAttemptController::class, 'submitExam']);
+        Route::post('/exam-attempts/{attemptId}/update-marks', [ExamAttemptController::class, 'updateAnswerMarks']);
+        Route::post('/exam-attempts/{attemptId}/ai-grade', [AIExamGradingController::class, 'aiGradeAnswer']);
+        Route::post('/exam-attempts/{attemptId}/ai-grade-multiple', [AIExamGradingController::class, 'aiGradeMultipleAnswers']);
+        Route::get('/exam-attempts/history', [ExamAttemptController::class, 'history']);
+        Route::get('/exam-attempts/{attemptId}', [ExamAttemptController::class, 'show']);
         
         // Purchased courses routes
         Route::get('/purchased-courses', [PurchasedCourceController::class, 'index']);

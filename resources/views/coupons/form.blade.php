@@ -189,7 +189,7 @@
                                             multiple>
                                         @foreach($courses as $course)
                                             <option value="{{ $course->id }}" 
-                                                    {{ in_array($course->id, old('applicable_courses', isset($coupon) ? $coupon->applicable_courses : [])) ? 'selected' : '' }}>
+                                                    {{ in_array($course->id, old('applicable_courses', isset($coupon) && $coupon->applicable_courses ? $coupon->applicable_courses : [])) ? 'selected' : '' }}>
                                                 {{ $course->name }} - ${{ $course->price }}
                                             </option>
                                         @endforeach
@@ -234,6 +234,7 @@
                                 <div class="mb-3">
                                     <div class="form-check">
                                         <input type="checkbox" 
+                                               value="1"
                                                name="is_active" 
                                                id="is_active" 
                                                class="form-check-input"
