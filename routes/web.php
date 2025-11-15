@@ -15,6 +15,15 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CourseModuleController;
 use App\Http\Controllers\CourseModuleFileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\OrganizationThemeController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\SectionController;
+use App\Http\Controllers\ContentController;
+use App\Http\Controllers\ThemeController;
+use App\Http\Controllers\SectionLayoutController;
+use App\Http\Controllers\SectionContentController;
+use App\Http\Controllers\SeoSettingController;
+use App\Http\Controllers\MediaController;
 
 
 
@@ -29,6 +38,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('domains', DomainController::class);
     Route::resource('organizations', OrganizationController::class);
+    Route::resource('organization-themes', OrganizationThemeController::class);
+    Route::resource('themes', ThemeController::class);
+    Route::resource('pages', PageController::class);
+    Route::resource('sections', SectionController::class)->except(['index', 'create', 'show', 'store']);
+    Route::get('pages/{page}/sections', [SectionController::class, 'index'])->name('sections.index');
+    Route::post('pages/{page}/sections', [SectionController::class, 'store'])->name('sections.store');
+    Route::resource('contents', ContentController::class)->except(['index', 'create', 'show']);
+    Route::get('sections/{section}/contents', [ContentController::class, 'index'])->name('contents.index');
             Route::resource('course-categories', CourseCategoryController::class);
         Route::resource('course-sub-categories', CourseSubCategoryController::class);
         Route::resource('courses', CourseController::class);
@@ -52,6 +69,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');
         Route::get('students/{student}/statistics', [StudentController::class, 'statistics'])->name('students.statistics');
         Route::post('course-purchases/{purchase}/update-status', [StudentController::class, 'updatePaymentStatus'])->name('course-purchases.update-status');
+
+        Route::resource('section-layouts', SectionLayoutController::class);
+        Route::resource('section-contents', SectionContentController::class);
+        Route::resource('seo-settings', SeoSettingController::class);
+        Route::resource('media', MediaController::class);
+
 });
 
 

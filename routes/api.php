@@ -62,11 +62,11 @@ Route::prefix('student')->group(function () {
 
 
 
-// Public Course routes
-Route::get('/courses', [PublicCourseController::class, 'index']);
-Route::get('/courses/featured', [PublicCourseController::class, 'featured']);
-Route::get('/courses/single/{id}', [PublicCourseController::class, 'show']);
-Route::get('/courses/categories', [PublicCourseController::class, 'categories']);
-Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
-Route::get('/courses/search', [PublicCourseController::class, 'search']);
-Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);
+    // Public Course routes
+    Route::get('/courses', [PublicCourseController::class, 'index']);
+    Route::get('/courses/featured', [PublicCourseController::class, 'featured']);
+    Route::get('/courses/single/{id}', [PublicCourseController::class, 'show']);
+    Route::get('/courses/categories', [PublicCourseController::class, 'categories']);
+    Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
+    Route::get('/courses/search', [PublicCourseController::class, 'search']);
+    Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);

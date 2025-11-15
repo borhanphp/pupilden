@@ -56,6 +56,35 @@
               <span class="sub-item">Coupons</span>
             </a>
           </li>
+          <li>
+            <a href="{{route('themes.index')}}">
+              <span class="sub-item">Themes</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('pages.index')}}">
+              <span class="sub-item">Pages</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('section-layouts.index')}}">
+              <span class="sub-item">Section Layouts</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('section-contents.index')}}">
+              <span class="sub-item">Section Contents</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('seo-settings.index')}}">
+              <span class="sub-item">SEO Settings</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('media.index')}}">
+              <span class="sub-item">Media</span>
+            </a>
         </ul>
       </div>
     </li>
