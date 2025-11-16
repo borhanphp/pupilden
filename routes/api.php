@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Student\ExamAttemptController;
 use App\Http\Controllers\Api\Student\AIExamGradingController;
 use App\Http\Controllers\Api\Student\PurchasedCourceController;
 use App\Http\Controllers\Api\PublicCourseController;
+use App\Http\Controllers\Api\SiteInformationController;
 
 // Admin API (default users)
 Route::middleware('auth:sanctum')->group(function () {
@@ -70,3 +71,6 @@ Route::prefix('student')->group(function () {
     Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
     Route::get('/courses/search', [PublicCourseController::class, 'search']);
     Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);
+
+    // Site information routes
+    Route::get('/site-information', [SiteInformationController::class, 'siteInformation']);

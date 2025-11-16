@@ -24,6 +24,7 @@ use App\Http\Controllers\SectionLayoutController;
 use App\Http\Controllers\SectionContentController;
 use App\Http\Controllers\SeoSettingController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\OrganizationSettingController;
 
 
 
@@ -38,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('domains', DomainController::class);
     Route::resource('organizations', OrganizationController::class);
+    Route::post('organizations/settings/update', [OrganizationController::class, 'updateSettings'])->name('organizations.settings.update');
     Route::resource('organization-themes', OrganizationThemeController::class);
     Route::resource('themes', ThemeController::class);
     Route::resource('pages', PageController::class);
@@ -74,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('section-contents', SectionContentController::class);
         Route::resource('seo-settings', SeoSettingController::class);
         Route::resource('media', MediaController::class);
+        Route::resource('organization-settings', OrganizationSettingController::class);
 
 });
 

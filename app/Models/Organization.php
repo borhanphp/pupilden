@@ -34,4 +34,9 @@ class Organization extends Model
         'created_by',
         'updated_by'
     ];
+
+    public function settings()
+    {
+        return $this->hasOne(OrganizationSetting::class);
+    }
 }
