@@ -56,6 +56,12 @@
               <span class="sub-item">Coupons</span>
             </a>
           </li>
+        
+          <li>
+            <a href="{{route('payment-gateways.index')}}">
+              <span class="sub-item">Payment Gateways</span>
+            </a>
+          </li>
           <li>
             <a href="{{route('themes.index')}}">
               <span class="sub-item">Themes</span>
@@ -137,7 +143,28 @@
         </ul>
       </div>
     </li>
-    
+    <li class="nav-item">
+      <a data-bs-toggle="collapse" href="#student">
+        <i class="fas fa-pen-square"></i>
+        <p>Student</p>
+        <span class="caret"></span>
+      </a>
+      <div class="collapse" id="student">
+        <ul class="nav nav-collapse">
+          <li>
+            <a href="{{route('students.index')}}">
+              <span class="sub-item">Students</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('student-courses.index')}}">
+              <span class="sub-item">Student Courses</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+   
     <li class="nav-item">
       <a data-bs-toggle="collapse" href="#exam">
         <i class="fas fa-pen-square"></i>

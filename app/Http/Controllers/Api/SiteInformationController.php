@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController;
-use App\Models\OrganizationSetting;
+use App\Models\PaymentGateway;
 use App\Models\Organization;
 use App\Models\Domain;
 class SiteInformationController extends BaseController
@@ -83,6 +83,26 @@ class SiteInformationController extends BaseController
             ]);
         } catch (\Exception $e) {
             return $this->error('Error fetching site information', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function paymentGateways(Request $request)
+    {
+        try {
+            $domainValidation = $this->validateDomain($request);
+            if (isset($domainValidation['error'])) {
+                return $this->error($domainValidation['error'], ['error' => $domainValidation['error']]);
+            }
+
+            $organization_id = $domainValidation['organization_id'];
+
+            $paymentGateways = PaymentGateway::where('organization_id', $organization_id)->get();
+
+            return $this->success('Payment gateways fetched successfully', [
+                'payment_gateways' => $paymentGateways
+            ]);
+        } catch (\Exception $e) {
+            return $this->error('Error fetching payment gateways', ['error' => $e->getMessage()]);
         }
     }
 }

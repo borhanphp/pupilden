@@ -74,3 +74,4 @@ Route::prefix('student')->group(function () {
 
     // Site information routes
     Route::get('/site-information', [SiteInformationController::class, 'siteInformation']);
+    Route::get('/payment-gateways', [SiteInformationController::class, 'paymentGateways']);

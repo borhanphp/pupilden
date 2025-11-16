@@ -25,6 +25,8 @@ use App\Http\Controllers\SectionContentController;
 use App\Http\Controllers\SeoSettingController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OrganizationSettingController;
+use App\Http\Controllers\StudentCourseController;
+use App\Http\Controllers\PaymentGatewayController;
 
 
 
@@ -77,6 +79,12 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('seo-settings', SeoSettingController::class);
         Route::resource('media', MediaController::class);
         Route::resource('organization-settings', OrganizationSettingController::class);
+        Route::resource('student-courses', StudentCourseController::class)->only(['index', 'show']);
+        Route::put('student-courses/{courseStudent}/approve', [StudentCourseController::class, 'approve'])->name('student-courses.approve');
+        Route::put('student-courses/{courseStudent}/disapprove', [StudentCourseController::class, 'disapprove'])->name('student-courses.disapprove');
+        Route::resource('payment-gateways', PaymentGatewayController::class);
+        Route::put('payment-gateways/{paymentGateway}/toggle-active', [PaymentGatewayController::class, 'toggleActive'])->name('payment-gateways.toggle-active');
+        Route::put('payment-gateways/{paymentGateway}/set-default', [PaymentGatewayController::class, 'setDefault'])->name('payment-gateways.set-default');
 
 });
 

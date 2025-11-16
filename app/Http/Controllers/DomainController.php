@@ -31,7 +31,7 @@ class DomainController extends Controller
     {
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:domains,domain_name',
             ]);
             $data=Domain::create([
                 'organization_id' => auth()->user()->organization_id,
@@ -72,7 +72,7 @@ class DomainController extends Controller
     public function update(Request $request, Domain $domain)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:domains,domain_name,' . $domain->id,
         ]);
         
         $domain->update([
