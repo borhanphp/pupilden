@@ -31,31 +31,5 @@ class OrganizationSetting extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    /**
-     * Get the logo URL
-     */
-    public function getLogoAttribute()
-    {
-        $logo = $this->attributes['logo'] ?? null;
-        return $logo ? asset('uploads/' . $this->organization_id . '/settings/logo/' . $logo) : null;
-    }
-
-    /**
-     * Get the favicon URL
-     */
-    public function getFaviconAttribute()
-    {
-        $favicon = $this->attributes['favicon'] ?? null;
-        return $favicon ? asset('uploads/' . $this->organization_id . '/settings/favicon/' . $favicon) : null;
-    }
-
-    /**
-     * Get the banner URL
-     */
-    public function getBannerAttribute()
-    {
-        $banner = $this->attributes['banner'] ?? null;
-        return $banner ? asset('uploads/' . $this->organization_id . '/settings/banner/' . $banner) : null;
-    }
 
 }
