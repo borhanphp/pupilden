@@ -27,10 +27,18 @@ class StudentAuthController extends BaseController
 
             $domain = Domain::where('domain_name', $request->domain_name)->firstOrFail();
 
+            // Check username uniqueness within organization
             if (Student::where('organization_id', $domain->organization_id)
                 ->where('username', $request->username)
                 ->exists()) {
                 return response()->json(['error' => 'Username already taken'], 422);
+            }
+
+            // Check email uniqueness within organization if email is provided
+            if ($request->email && Student::where('organization_id', $domain->organization_id)
+                ->where('email', $request->email)
+                ->exists()) {
+                return response()->json(['error' => 'Email already taken'], 422);
             }
 
             $student = Student::create([
@@ -60,8 +68,15 @@ class StudentAuthController extends BaseController
         $domain = Domain::where('domain_name', $request->domain_name)->firstOrFail();
 
         $student = Student::where('organization_id', $domain->organization_id)
-            ->where('username', $request->username)
+            ->where(function($query) use ($request){
+                $query->where('username', $request->username)
+                    ->orWhere('email', $request->username);
+            })
             ->first();
+
+        if(!$student){
+            return $this->error('Invalid credentials', ['error' => 'Invalid credentials']);
+        }
 
         if(!$student->is_active){
             return $this->error('Student is not active', ['error' => 'Student is not active']);
@@ -96,12 +111,40 @@ class StudentAuthController extends BaseController
     public function profile_update(Request $request)
     {
         try{
+            $student = $request->user('student');
+            
             $request->validate([
                 'name' => 'required|string',
-                'email' => 'required|email'
+                'email' => [
+                    'required',
+                    'email',
+                    function ($attribute, $value, $fail) use ($student) {
+                        // Check if email is unique within the same organization, excluding current student
+                        if (Student::where('organization_id', $student->organization_id)
+                            ->where('email', $value)
+                            ->where('id', '!=', $student->id)
+                            ->exists()) {
+                            $fail('The email has already been taken in this organization.');
+                        }
+                    },
+                ],
+                'username' => [
+                    'nullable',
+                    'string',
+                    function ($attribute, $value, $fail) use ($student) {
+                        if ($value) {
+                            // Check if username is unique within the same organization, excluding current student
+                            if (Student::where('organization_id', $student->organization_id)
+                                ->where('username', $value)
+                                ->where('id', '!=', $student->id)
+                                ->exists()) {
+                                $fail('The username has already been taken in this organization.');
+                            }
+                        }
+                    },
+                ],
             ]);
 
-            $student = $request->user('student');
             $input = $request->all();
             if($request->hasFile('profile_picture')){
                 $folder = $student->organization_id.'/profile_pictures';

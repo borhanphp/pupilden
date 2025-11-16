@@ -11,9 +11,9 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-user-graduate"></i> Students
                         </h4>
-                        <a href="{{ route('students.create') }}" class="btn btn-primary">
+                        {{-- <a href="{{ route('students.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Add New Student
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
                 <div class="card-body">
@@ -156,9 +156,9 @@
                                             <div class="py-4">
                                                 <i class="fas fa-user-graduate fa-3x mb-3"></i>
                                                 <p>No students found.</p>
-                                                <a href="{{ route('students.create') }}" class="btn btn-primary">
+                                                {{-- <a href="{{ route('students.create') }}" class="btn btn-primary">
                                                     <i class="fas fa-plus"></i> Add your first student
-                                                </a>
+                                                </a> --}}
                                             </div>
                                         </td>
                                     </tr>
