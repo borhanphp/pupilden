@@ -15,7 +15,9 @@ class CourseModuleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = CourseModule::with(['course', 'files']);
+        $query = CourseModule::with(['course', 'files'])->whereHas('course', function($query) {
+            $query->where('organization_id', auth()->user()->organization_id);
+        });
 
         // Filter by course if course_id is provided
         if ($request->has('course_id') && $request->course_id) {
@@ -31,7 +33,7 @@ class CourseModuleController extends Controller
         }
 
         $courseModules = $query->orderBy('order');
-        $courses = Course::where('is_active', true)->get();
+        $courses = Course::where('is_active', true)->where('organization_id', auth()->user()->organization_id)->get();
         // check if request is ajax
         if ($request->ajax()) {
             return response()->json($courseModules->get());
@@ -46,7 +48,7 @@ class CourseModuleController extends Controller
      */
     public function create(Request $request)
     {
-        $courses = Course::where('is_active', true)->get();
+        $courses = Course::where('is_active', true)->where('organization_id', auth()->user()->organization_id)->get();
         $selectedCourseId = $request->get('course_id');
         
         return view('course-modules.create', compact('courses', 'selectedCourseId'));
@@ -110,7 +112,7 @@ class CourseModuleController extends Controller
      */
     public function edit(CourseModule $courseModule)
     {
-        $courses = Course::where('is_active', true)->get();
+        $courses = Course::where('is_active', true)->where('organization_id', auth()->user()->organization_id)->get();
         
         return view('course-modules.edit', compact('courseModule', 'courses'));
     }

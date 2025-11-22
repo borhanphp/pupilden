@@ -15,7 +15,11 @@ class CourseModuleFileController extends Controller
      */
     public function index(Request $request)
     {
-        $query = CourseModuleFile::with(['courseModule']);
+        $query = CourseModuleFile::with(['courseModule'])->whereHas('courseModule', function($query) {
+            $query->whereHas('course', function($query) {
+                $query->where('organization_id', auth()->user()->organization_id);
+            });
+        });
 
         // Filter by course module if course_module_id is provided
         if ($request->has('course_module_id') && $request->course_module_id) {
@@ -32,7 +36,9 @@ class CourseModuleFileController extends Controller
         }
 
         $courseModuleFiles = $query->orderBy('created_at', 'desc')->paginate(15);
-        $courseModules = CourseModule::with('course')->get();
+        $courseModules = CourseModule::with('course')->whereHas('course', function($query) {
+            $query->where('organization_id', auth()->user()->organization_id);
+        })->get();
 
         return view('course-module-files.index', compact('courseModuleFiles', 'courseModules'));
     }
@@ -42,7 +48,9 @@ class CourseModuleFileController extends Controller
      */
     public function create(Request $request)
     {
-        $courseModules = CourseModule::with('course')->get();
+        $courseModules = CourseModule::with('course')->whereHas('course', function($query) {
+            $query->where('organization_id', auth()->user()->organization_id);
+        })->get();
         $selectedCourseModuleId = $request->get('course_module_id');
         
         return view('course-module-files.create', compact('courseModules', 'selectedCourseModuleId'));
@@ -109,7 +117,9 @@ class CourseModuleFileController extends Controller
      */
     public function edit(CourseModuleFile $courseModuleFile)
     {
-        $courseModules = CourseModule::with('course')->get();
+        $courseModules = CourseModule::with('course')->whereHas('course', function($query) {
+            $query->where('organization_id', auth()->user()->organization_id);
+        })->get();
         
         return view('course-module-files.edit', compact('courseModuleFile', 'courseModules'));
     }
