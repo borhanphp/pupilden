@@ -54,6 +54,9 @@
                                             class="form-select @error('course_module_id') is-invalid @enderror">
                                         <option value="">Select a course module</option>
                                     </select>
+                                    @error('course_module_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-3">
@@ -287,9 +290,19 @@
     <script>
         // Detect if we're in edit mode
         const isEditMode = {{ isset($video) ? 'true' : 'false' }};
+        const selectedModuleId = {{ isset($video) && $video->course_module_id ? $video->course_module_id : 'null' }};
+        
         // Initialize form on page load
         document.addEventListener('DOMContentLoaded', function() {
             toggleVideoInputs();
+            
+            // Load course modules if editing and course is selected
+            if (isEditMode) {
+                const courseId = document.getElementById('course_id').value;
+                if (courseId) {
+                    getCourseModules(courseId, selectedModuleId);
+                }
+            }
         });
 
         // Toggle video input fields based on video type
@@ -429,7 +442,7 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
-        function getCourseModules(courseId) {
+        function getCourseModules(courseId, selectedModuleId = null) {
             $.ajax({
                 url: "{{ route('course-modules.index') }}",
                 type: "GET",
@@ -439,7 +452,8 @@
                     $('#course_module_id').html('');
                     $('#course_module_id').append('<option value="">Select a course module</option>');
                     response.forEach(function(module) {
-                        $('#course_module_id').append('<option value="' + module.id + '">' + module.name + '</option>');
+                        const selected = selectedModuleId && module.id == selectedModuleId ? ' selected' : '';
+                        $('#course_module_id').append('<option value="' + module.id + '"' + selected + '>' + module.name + '</option>');
                     });
                 }
             });

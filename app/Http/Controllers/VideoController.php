@@ -346,41 +346,50 @@ class VideoController extends Controller
             }
 
             // Handle different video types
-            if ($request->video_type == 2 && $request->hasFile('video_file')) {
-                // Cloudflare Stream upload
-                $cloudflareData = $this->uploadToCloudflare($request->file('video_file'), $request->title);
-                
-                if ($cloudflareData['success']) {
-                    $videoData['video_url'] = $cloudflareData['video_url'];
-                    $videoData['cloudflare_video_id'] = $cloudflareData['video_id'];
-                    $videoData['thumbnail_url'] = $cloudflareData['thumbnail_url'];
-                    $videoData['file_size'] = $cloudflareData['file_size'];
+            if ($request->video_type == 2) {
+                // Cloudflare Stream - only upload if new file provided
+                if ($request->hasFile('video_file')) {
+                    $cloudflareData = $this->uploadToCloudflare($request->file('video_file'), $request->title);
                     
-                    // Update duration if not provided
-                    if (!$request->duration && isset($cloudflareData['duration'])) {
-                        $videoData['duration'] = $cloudflareData['duration'];
+                    if ($cloudflareData['success']) {
+                        $videoData['video_url'] = $cloudflareData['video_url'];
+                        $videoData['cloudflare_video_id'] = $cloudflareData['video_id'];
+                        $videoData['thumbnail_url'] = $cloudflareData['thumbnail_url'];
+                        $videoData['file_size'] = $cloudflareData['file_size'];
+                        
+                        // Update duration if not provided
+                        if (!$request->duration && isset($cloudflareData['duration'])) {
+                            $videoData['duration'] = $cloudflareData['duration'];
+                        }
+                    } else {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Error uploading to Cloudflare: ' . $cloudflareData['message']);
                     }
-                } else {
-                    return redirect()->back()
-                        ->withInput()
-                        ->with('error', 'Error uploading to Cloudflare: ' . $cloudflareData['message']);
                 }
-            } elseif ($request->video_type == 1 && $request->video_url) {
-                // YouTube video
-                $videoData['video_url'] = $request->video_url;
-                $videoData['cloudflare_video_id'] = null;
-                $videoData['thumbnail_url'] = null;
-                $videoData['file_size'] = null;
-            } elseif ($request->video_type == 0 && $request->video_url) {
-                // S3 or other URL
-                $videoData['video_url'] = $request->video_url;
-                $videoData['cloudflare_video_id'] = null;
-                $videoData['thumbnail_url'] = null;
-                $videoData['file_size'] = null;
-            } else {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Please provide either a video file (for Cloudflare) or video URL (for S3/YouTube)');
+                // If no new file uploaded, keep existing Cloudflare video data
+            } elseif ($request->video_type == 1) {
+                // YouTube video - update URL if provided
+                if ($request->video_url) {
+                    $videoData['video_url'] = $request->video_url;
+                }
+                // Clear Cloudflare-specific fields when switching from Cloudflare to YouTube
+                if ($video->video_type == 2) {
+                    $videoData['cloudflare_video_id'] = null;
+                    $videoData['thumbnail_url'] = null;
+                    $videoData['file_size'] = null;
+                }
+            } elseif ($request->video_type == 0) {
+                // S3 or other URL - update URL if provided
+                if ($request->video_url) {
+                    $videoData['video_url'] = $request->video_url;
+                }
+                // Clear Cloudflare-specific fields when switching from Cloudflare to S3
+                if ($video->video_type == 2) {
+                    $videoData['cloudflare_video_id'] = null;
+                    $videoData['thumbnail_url'] = null;
+                    $videoData['file_size'] = null;
+                }
             }
 
             $video->update($videoData);
@@ -389,7 +398,7 @@ class VideoController extends Controller
                 ->with('success', 'Video updated successfully');
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            Log::error('Video update error: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error updating video: ' . $e->getMessage());
