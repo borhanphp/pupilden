@@ -153,7 +153,7 @@ class CoursePurchaseController extends Controller
                     ] : null,
                     'transaction_id' => $transactionId,
                     'payment_status' => 'completed',
-                    'purchased_at' => $purchase->purchased_at->toISOString(),
+                    'purchased_at' => $purchase?->purchased_at?->toISOString(),
                 ]
             ], 201);
 
