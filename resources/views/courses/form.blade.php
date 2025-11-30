@@ -198,6 +198,10 @@
                                     @error('image')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <div class="form-text">
+                                        Max size: 2MB. Supported formats: JPEG, PNG, JPG, GIF
+                                        Image size: 1050x600 or 7:4 aspect ratio
+                                    </div>
                                     @if(isset($course) && $course->image)
                                         <div class="mt-2">
                                             <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_images/' . $course->image) }}" 
