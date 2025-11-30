@@ -10,6 +10,16 @@
                     <h4 class="card-title">{{ isset($video) ? 'Edit Video' : 'Add New Video' }}</h4>
                 </div>
                 <div class="card-body">
+                    <!-- show form validation errors -->
+                    @if(isset($errors) && $errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <form action="{{ isset($video) ? route('videos.update', $video) : route('videos.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @if(isset($video))
