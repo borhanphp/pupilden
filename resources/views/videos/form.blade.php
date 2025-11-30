@@ -74,6 +74,9 @@
                                     <div class="form-text">
                                         Supported formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV<br>
                                         Maximum file size: 50GB
+                                        @if(isset($video))
+                                            <br><strong>Leave empty to keep the current video file</strong>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -272,6 +275,8 @@
     </div>
 
     <script>
+        // Detect if we're in edit mode
+        const isEditMode = {{ isset($video) ? 'true' : 'false' }};
         // Initialize form on page load
         document.addEventListener('DOMContentLoaded', function() {
             toggleVideoInputs();
@@ -290,7 +295,7 @@
                 // Cloudflare - show file upload, hide URL
                 videoFileContainer.style.display = 'block';
                 videoUrlContainer.style.display = 'none';
-                videoFileInput.required = true;
+                videoFileInput.required = !isEditMode;
                 videoUrlInput.required = false;
                 videoUrlInput.value = '';
             } else {
