@@ -122,7 +122,7 @@ class CoursePurchaseController extends Controller
             $transactionId = 'TXN_' . time() . '_' . $purchase->id;
             
             // Mark as completed and enroll student
-            $purchase->markAsCompleted($transactionId, $request->payment_method);
+            //$purchase->markAsCompleted($transactionId, $request->payment_method);
 
             // Increment coupon usage if used
             if ($coupon) {
