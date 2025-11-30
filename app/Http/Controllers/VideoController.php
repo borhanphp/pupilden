@@ -389,6 +389,7 @@ class VideoController extends Controller
                 ->with('success', 'Video updated successfully');
 
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error updating video: ' . $e->getMessage());
