@@ -21,7 +21,7 @@ class CoursePurchaseController extends Controller
             $validator = Validator::make($request->all(), [
                 'course_id' => 'required|exists:courses,id',
                 'coupon_code' => 'nullable|string|max:50',
-                'payment_method' => 'required|string|in:stripe,paypal,razorpay',
+                'payment_method' => 'required|string',
                 'payment_details' => 'nullable|array'
             ]);
 
