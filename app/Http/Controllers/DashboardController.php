@@ -65,11 +65,11 @@ class DashboardController extends Controller
         })
         ->where('payment_status', 'completed')
         ->select(
-            DB::raw("DATE_TRUNC('month', created_at) as month"),
+            DB::raw("DATE_FORMAT('month', created_at) as month"),
             DB::raw('SUM(final_price) as revenue')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy(DB::raw("DATE_TRUNC('month', created_at)"))
+        ->groupBy(DB::raw("DATE_FORMAT('month', created_at)"))
         ->orderBy('month')
         ->get();
 
@@ -78,11 +78,11 @@ class DashboardController extends Controller
             $q->where('organization_id', $organizationId);
         })
         ->select(
-            DB::raw("DATE_TRUNC('month', created_at) as month"),
+            DB::raw("DATE_FORMAT('month', created_at) as month"),
             DB::raw('COUNT(*) as count')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy(DB::raw("DATE_TRUNC('month', created_at)"))
+        ->groupBy(DB::raw("DATE_FORMAT('month', created_at)"))
         ->orderBy('month')
         ->get();
 
