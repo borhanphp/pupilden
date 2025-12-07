@@ -59,17 +59,23 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Determine the date truncation expression based on database driver
+        $driver = DB::getDriverName();
+        $monthTruncate = $driver === 'pgsql' 
+            ? "DATE_TRUNC('month', created_at)" 
+            : "DATE_FORMAT(created_at, '%Y-%m-01')";
+
         // Revenue Chart Data (Last 6 months)
         $revenueChartData = CoursePurchase::whereHas('course', function($q) use ($organizationId) {
             $q->where('organization_id', $organizationId);
         })
         ->where('payment_status', 'completed')
         ->select(
-            DB::raw("DATE_FORMAT('month', created_at) as month"),
+            DB::raw("$monthTruncate as month"),
             DB::raw('SUM(final_price) as revenue')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy(DB::raw("DATE_FORMAT('month', created_at)"))
+        ->groupBy(DB::raw($monthTruncate))
         ->orderBy('month')
         ->get();
 
@@ -78,11 +84,11 @@ class DashboardController extends Controller
             $q->where('organization_id', $organizationId);
         })
         ->select(
-            DB::raw("DATE_FORMAT('month', created_at) as month"),
+            DB::raw("$monthTruncate as month"),
             DB::raw('COUNT(*) as count')
         )
         ->where('created_at', '>=', now()->subMonths(6))
-        ->groupBy(DB::raw("DATE_FORMAT('month', created_at)"))
+        ->groupBy(DB::raw($monthTruncate))
         ->orderBy('month')
         ->get();
 
