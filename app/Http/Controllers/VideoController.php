@@ -73,7 +73,6 @@ class VideoController extends Controller
     {
         try {
             $courses = Course::where('organization_id', auth()->user()->organization_id)
-                ->where('is_published', true)
                 ->where('is_active', true)
                 ->where('is_archived', false)
                 ->orderBy('name')
@@ -278,7 +277,6 @@ class VideoController extends Controller
             }
 
             $courses = Course::where('organization_id', auth()->user()->organization_id)
-                ->where('is_published', true)
                 ->where('is_active', true)
                 ->where('is_archived', false)
                 ->orderBy('name')

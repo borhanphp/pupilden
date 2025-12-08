@@ -154,7 +154,7 @@
                                 <h6 class="mb-1">{{ $request->student->name }}</h6>
                                 <small class="text-muted">{{ $request->course->name }}</small>
                                 <br>
-                                <small class="text-muted">{{ $request->created_at->diffForHumans() }}</small>
+                                <small class="text-muted">{{ \Carbon\Carbon::parse($request->created_at)->format('M j, Y') }}</small>
                             </div>
                             <span class="badge bg-warning">Pending</span>
                         </div>
@@ -196,7 +196,7 @@
                                         <td>{{ $purchase->student->name }}</td>
                                         <td>{{ $purchase->course->name }}</td>
                                         <td>${{ number_format($purchase->final_price, 2) }}</td>
-                                        <td>{{ $purchase->created_at->format('M j, Y') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($purchase->created_at)->format('M j, Y') }}</td>
                                         <td>
                                             <span class="badge bg-success">{{ ucfirst($purchase->payment_status) }}</span>
                                         </td>
