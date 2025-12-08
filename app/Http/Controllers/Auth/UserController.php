@@ -15,14 +15,14 @@ class UserController extends Controller
     use AuthorizesRequests;
     public function index()
     {
-        $this->authorize('view users');
+        //$this->authorize('view users');
         $users = User::with('roles')->get();
         return view('users.list', compact('users'));
     }
 
     public function create()
     {
-        $this->authorize('create users');
+        //$this->authorize('create users');
         $formType = 'create';
         $roles = Role::all();
         $user = new User();
@@ -31,7 +31,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create users');
+        //$this->authorize('create users');
         $request->validate([
             'username' => 'required|string|max:255',
             'name' => 'required|string|max:255',
@@ -65,7 +65,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $this->authorize('edit users');
+       // $this->authorize('edit users');
         $formType = 'edit';
         $roles = Role::all();
         return view('users.form', compact('user', 'roles', 'formType'));
@@ -73,7 +73,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $this->authorize('edit users');
+       // $this->authorize('edit users');
         $request->validate([
             'username' => 'required|string|max:255',
             'name' => 'required|string|max:255',
