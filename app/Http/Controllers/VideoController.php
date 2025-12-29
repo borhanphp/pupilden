@@ -100,7 +100,7 @@ class VideoController extends Controller
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
                 'title' => 'required|string|max:255',
-                'video_file' => 'nullable|file|mimes:mp4,avi,mov,wmv,flv,webm,mkv|max:51200', // Max 50GB
+                'video_file' => 'nullable|file|mimes:mp4,avi,mov,wmv,flv,webm,mkv|max:2097152', // Max 2GB (2048MB = 2097152KB)
                 'video_url' => 'nullable|url|max:500',
                 'video_type' => 'required|in:0,1,2', // 0=S3, 1=YouTube, 2=Cloudflare
                 'course_module_id' => 'nullable|exists:course_modules,id',
@@ -314,7 +314,7 @@ class VideoController extends Controller
             $request->validate([
                 'course_id' => 'required|exists:courses,id',
                 'title' => 'required|string|max:255',
-                'video_file' => 'nullable|file|mimes:mp4,avi,mov,wmv,flv,webm,mkv|max:51200', // Max 50GB
+                'video_file' => 'nullable|file|mimes:mp4,avi,mov,wmv,flv,webm,mkv|max:2097152', // Max 2GB (2048MB = 2097152KB)
                 'video_url' => 'nullable|url|max:500',
                 'video_type' => 'required|in:0,1,2', // 0=S3, 1=YouTube, 2=Cloudflare
                 'course_module_id' => 'nullable|exists:course_modules,id',
