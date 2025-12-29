@@ -23,6 +23,9 @@ class Video extends Model
         'thumbnail_url',
         'preview_image',
         'file_size',
+        'upload_status',
+        'upload_progress',
+        'upload_error',
         'created_by',
         'updated_by'
     ];
@@ -34,6 +37,7 @@ class Video extends Model
         'is_published' => 'boolean',
         'order' => 'integer',
         'file_size' => 'integer',
+        'upload_progress' => 'integer',
     ];
 
     /**
@@ -134,5 +138,57 @@ class Video extends Model
     public function courseModule()
     {
         return $this->belongsTo(CourseModule::class);
+    }
+
+    /**
+     * Get upload status label
+     */
+    public function getUploadStatusLabelAttribute()
+    {
+        return match($this->upload_status ?? 'completed') {
+            'pending' => 'Pending',
+            'processing' => 'Processing',
+            'completed' => 'Completed',
+            'failed' => 'Failed',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Get upload status badge class
+     */
+    public function getUploadStatusBadgeAttribute()
+    {
+        return match($this->upload_status ?? 'completed') {
+            'pending' => 'bg-warning',
+            'processing' => 'bg-info',
+            'completed' => 'bg-success',
+            'failed' => 'bg-danger',
+            default => 'bg-secondary'
+        };
+    }
+
+    /**
+     * Check if video upload is complete
+     */
+    public function isUploadComplete()
+    {
+        return $this->upload_status === 'completed' || $this->upload_status === null;
+    }
+
+    /**
+     * Check if video upload is in progress
+     */
+    public function isUploading()
+    {
+        return in_array($this->upload_status, ['pending', 'processing']);
+    }
+
+    /**
+     * Check if video upload failed
+     */
+    public function isUploadFailed()
+    {
+        return $this->upload_status === 'failed';
     }
 }
