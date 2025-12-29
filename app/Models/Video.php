@@ -98,26 +98,36 @@ class Video extends Model
     }
 
     /**
-     * Get video thumbnail URL
+     * Get video thumbnail URL (Accessor)
+     * Returns the best available thumbnail: custom preview > YouTube > Cloudflare > null
      */
     public function getThumbnailUrlAttribute()
     {
         // Return custom preview image if available
-        if ($this->preview_image) {
-            return asset('storage/' . $this->preview_image);
+        if ($this->attributes['preview_image'] ?? null) {
+            return asset('storage/' . $this->attributes['preview_image']);
         }
         
-        if ($this->video_type === 1 && $this->video_url) {
+        if ($this->attributes['video_type'] === 1 && ($this->attributes['video_url'] ?? null)) {
             // YouTube video thumbnail
-            $videoId = $this->extractYouTubeVideoId($this->video_url);
+            $videoId = $this->extractYouTubeVideoId($this->attributes['video_url']);
             if ($videoId) {
                 return "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg";
             }
-        } elseif ($this->video_type === 2 && $this->thumbnail_url) {
-            // Cloudflare video thumbnail
-            return $this->thumbnail_url;
+        } elseif ($this->attributes['video_type'] === 2 && ($this->attributes['thumbnail_url'] ?? null)) {
+            // Cloudflare video thumbnail (accessing raw database value)
+            return $this->attributes['thumbnail_url'];
         }
+        
         return null;
+    }
+    
+    /**
+     * Get the raw Cloudflare thumbnail URL from database
+     */
+    public function getCloudflareThumbAttribute()
+    {
+        return $this->attributes['thumbnail_url'] ?? null;
     }
 
     /**
