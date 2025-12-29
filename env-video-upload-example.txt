@@ -1,0 +1,38 @@
+# ============================================
+# VIDEO UPLOAD OPTIMIZATION CONFIGURATION
+# ============================================
+# Copy these settings to your .env file
+
+# Queue Configuration
+# Options: sync, database, redis, beanstalkd, sqs
+# - sync: Processes jobs immediately (no background processing)
+# - database: Uses database for queue (good for development)
+# - redis: Uses Redis (recommended for production)
+QUEUE_CONNECTION=database
+
+# Cloudflare Stream Configuration
+# Get these from: https://dash.cloudflare.com/
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here
+
+# Session Configuration
+# Increase for long upload sessions
+SESSION_LIFETIME=120
+
+# File System Configuration
+FILESYSTEM_DISK=local
+
+# Redis Configuration (if using redis queue)
+# REDIS_HOST=127.0.0.1
+# REDIS_PASSWORD=null
+# REDIS_PORT=6379
+
+# ============================================
+# INSTRUCTIONS
+# ============================================
+# 1. Copy these settings to your .env file
+# 2. Update CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID
+# 3. Run: php artisan migrate
+# 4. Run: php artisan queue:work
+# 5. See VIDEO_UPLOAD_OPTIMIZATION_GUIDE.md for full setup
+

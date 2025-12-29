@@ -1,0 +1,75 @@
+; ============================================
+; PHP.INI VIDEO UPLOAD OPTIMIZATION SETTINGS
+; ============================================
+; Add or update these settings in your php.ini file
+; Location: E:\xampp8.2.12\php\php.ini (XAMPP Windows)
+;           C:\xampp\php\php.ini (XAMPP Windows)
+;           /etc/php/8.2/apache2/php.ini (Linux Apache)
+;           /etc/php/8.2/fpm/php.ini (Linux PHP-FPM)
+
+; Maximum size of POST data that PHP will accept
+; This should be larger than upload_max_filesize
+post_max_size = 2048M
+
+; Maximum allowed size for uploaded files
+; Set this to your maximum video file size
+upload_max_filesize = 2048M
+
+; Maximum execution time of each script (in seconds)
+; 3600 seconds = 1 hour
+max_execution_time = 3600
+
+; Maximum amount of time each script may spend parsing request data
+; Should be equal to or greater than max_execution_time
+max_input_time = 3600
+
+; Maximum amount of memory a script may consume
+; Increase if handling very large files
+memory_limit = 512M
+
+; ============================================
+; INSTRUCTIONS
+; ============================================
+; 1. Open php.ini file in a text editor (as Administrator/root)
+; 2. Search for each setting above (Ctrl+F)
+; 3. Update the values to match the settings above
+; 4. Save the file
+; 5. Restart Apache/web server
+; 6. Verify changes by creating phpinfo.php:
+;    <?php phpinfo(); ?>
+; 7. Visit http://localhost/pupilden/phpinfo.php
+; 8. Search for the settings to confirm changes
+; 9. DELETE phpinfo.php after verification (security risk)
+
+; ============================================
+; XAMPP WINDOWS - RESTART APACHE
+; ============================================
+; 1. Open XAMPP Control Panel
+; 2. Click "Stop" next to Apache
+; 3. Wait for Apache to stop
+; 4. Click "Start" next to Apache
+
+; ============================================
+; LINUX - RESTART WEB SERVER
+; ============================================
+; Apache:
+;   sudo service apache2 restart
+;   OR
+;   sudo systemctl restart apache2
+;
+; PHP-FPM:
+;   sudo service php8.2-fpm restart
+;   OR
+;   sudo systemctl restart php8.2-fpm
+
+; ============================================
+; TROUBLESHOOTING
+; ============================================
+; If changes don't take effect:
+; 1. Make sure you edited the correct php.ini file
+;    (Check phpinfo() for "Loaded Configuration File")
+; 2. Restart web server again
+; 3. Clear browser cache
+; 4. Try a different browser
+; 5. Check for syntax errors in php.ini
+

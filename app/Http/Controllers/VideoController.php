@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Video;
 use App\Models\Course;
+use App\Jobs\ProcessVideoUpload;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -138,30 +138,41 @@ class VideoController extends Controller
 
             // Handle different video types
             if ($request->video_type == 2 && $request->hasFile('video_file')) {
-                // Cloudflare Stream upload
-                $cloudflareData = $this->uploadToCloudflare($request->file('video_file'), $request->title);
+                // Cloudflare Stream upload - Use Queue for async processing
+                $file = $request->file('video_file');
                 
-                if ($cloudflareData['success']) {
-                    $videoData['video_url'] = $cloudflareData['video_url'];
-                    $videoData['cloudflare_video_id'] = $cloudflareData['video_id'];
-                    $videoData['thumbnail_url'] = $cloudflareData['thumbnail_url'];
-                    $videoData['file_size'] = $cloudflareData['file_size'];
+                // Store file temporarily
+                $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
+                
+                // Set initial upload status
+                $videoData['upload_status'] = 'pending';
+                $videoData['upload_progress'] = 0;
+                $videoData['file_size'] = $file->getSize();
+                
+                // Create video record first
+                $video = Video::create($videoData);
+                
+                // Dispatch job to queue for background processing
+                ProcessVideoUpload::dispatch(
+                    $video,
+                    $tempPath,
+                    $file->getClientOriginalName(),
+                    $file->getSize()
+                );
+                
+                return redirect()->route('videos.index', $request->course_id)
+                    ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
                     
-                    // Update duration if not provided
-                    if (!$request->duration && isset($cloudflareData['duration'])) {
-                        $videoData['duration'] = $cloudflareData['duration'];
-                    }
-                } else {
-                    return redirect()->back()
-                        ->withInput()
-                        ->with('error', 'Error uploading to Cloudflare: ' . $cloudflareData['message']);
-                }
             } elseif ($request->video_type == 1 && $request->video_url) {
                 // YouTube video
                 $videoData['video_url'] = $request->video_url;
+                $videoData['upload_status'] = 'completed';
+                $videoData['upload_progress'] = 100;
             } elseif ($request->video_type == 0 && $request->video_url) {
                 // S3 or other URL
                 $videoData['video_url'] = $request->video_url;
+                $videoData['upload_status'] = 'completed';
+                $videoData['upload_progress'] = 100;
             } else {
                 return redirect()->back()
                     ->withInput()
@@ -347,23 +358,29 @@ class VideoController extends Controller
             if ($request->video_type == 2) {
                 // Cloudflare Stream - only upload if new file provided
                 if ($request->hasFile('video_file')) {
-                    $cloudflareData = $this->uploadToCloudflare($request->file('video_file'), $request->title);
+                    $file = $request->file('video_file');
                     
-                    if ($cloudflareData['success']) {
-                        $videoData['video_url'] = $cloudflareData['video_url'];
-                        $videoData['cloudflare_video_id'] = $cloudflareData['video_id'];
-                        $videoData['thumbnail_url'] = $cloudflareData['thumbnail_url'];
-                        $videoData['file_size'] = $cloudflareData['file_size'];
-                        
-                        // Update duration if not provided
-                        if (!$request->duration && isset($cloudflareData['duration'])) {
-                            $videoData['duration'] = $cloudflareData['duration'];
-                        }
-                    } else {
-                        return redirect()->back()
-                            ->withInput()
-                            ->with('error', 'Error uploading to Cloudflare: ' . $cloudflareData['message']);
-                    }
+                    // Store file temporarily
+                    $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
+                    
+                    // Set upload status
+                    $videoData['upload_status'] = 'pending';
+                    $videoData['upload_progress'] = 0;
+                    $videoData['file_size'] = $file->getSize();
+                    
+                    // Update video record first
+                    $video->update($videoData);
+                    
+                    // Dispatch job to queue for background processing
+                    ProcessVideoUpload::dispatch(
+                        $video,
+                        $tempPath,
+                        $file->getClientOriginalName(),
+                        $file->getSize()
+                    );
+                    
+                    return redirect()->route('videos.index', $request->course_id)
+                        ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
                 }
                 // If no new file uploaded, keep existing Cloudflare video data
             } elseif ($request->video_type == 1) {

@@ -20,11 +20,28 @@
                             </ul>
                         </div>
                     @endif
-                    <form action="{{ isset($video) ? route('videos.update', $video) : route('videos.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ isset($video) ? route('videos.update', $video) : route('videos.store') }}" method="POST" enctype="multipart/form-data" id="videoForm">
                         @csrf
                         @if(isset($video))
                             @method('PUT')
                         @endif
+                        
+                        <!-- Upload Progress Overlay -->
+                        <div id="uploadOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+                            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 500px; width: 90%;">
+                                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <h4 class="mb-3">Uploading Video...</h4>
+                                <p class="text-muted mb-3">Please wait while your video is being uploaded. This may take several minutes depending on the file size.</p>
+                                <div class="progress mb-3" style="height: 25px;">
+                                    <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> Do not close this window or navigate away
+                                </small>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-8">
@@ -86,7 +103,7 @@
                                     @enderror
                                     <div class="form-text">
                                         Supported formats: MP4, AVI, MOV, WMV, FLV, WebM, MKV<br>
-                                        Maximum file size: 50GB
+                                        Maximum file size: 1GB
                                         @if(isset($video))
                                             <br><strong>Leave empty to keep the current video file</strong>
                                         @endif
@@ -301,6 +318,37 @@
                     getCourseModules(courseId, selectedModuleId);
                 }
             }
+            
+            // Handle form submission with upload progress
+            const form = document.getElementById('videoForm');
+            const uploadOverlay = document.getElementById('uploadOverlay');
+            const progressBar = document.getElementById('uploadProgressBar');
+            
+            form.addEventListener('submit', function(e) {
+                const videoType = document.getElementById('video_type').value;
+                const videoFile = document.getElementById('video_file').files[0];
+                
+                // Only show progress for Cloudflare uploads with file
+                if (videoType == '2' && videoFile) {
+                    // Show upload overlay
+                    uploadOverlay.style.display = 'flex';
+                    
+                    // Simulate progress (since we can't track actual upload progress easily)
+                    let progress = 0;
+                    const interval = setInterval(function() {
+                        if (progress < 90) {
+                            progress += Math.random() * 10;
+                            if (progress > 90) progress = 90;
+                            progressBar.style.width = progress + '%';
+                            progressBar.textContent = Math.round(progress) + '%';
+                            progressBar.setAttribute('aria-valuenow', progress);
+                        }
+                    }, 500);
+                    
+                    // Store interval ID to clear it if needed
+                    form.dataset.progressInterval = interval;
+                }
+            });
         });
 
         // Toggle video input fields based on video type
