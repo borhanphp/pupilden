@@ -137,31 +137,66 @@ class VideoController extends Controller
             }
 
             // Handle different video types
-            if ($request->video_type == 2 && $request->hasFile('video_file')) {
-                // Cloudflare Stream upload - Use Queue for async processing
-                $file = $request->file('video_file');
-                
-                // Store file temporarily
-                $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
-                
-                // Set initial upload status
-                $videoData['upload_status'] = 'pending';
-                $videoData['upload_progress'] = 0;
-                $videoData['file_size'] = $file->getSize();
-                
-                // Create video record first
-                $video = Video::create($videoData);
-                
-                // Dispatch job to queue for background processing
-                ProcessVideoUpload::dispatch(
-                    $video,
-                    $tempPath,
-                    $file->getClientOriginalName(),
-                    $file->getSize()
-                );
-                
-                return redirect()->route('videos.index', $request->course_id)
-                    ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
+            if ($request->video_type == 2) {
+                // Cloudflare Stream upload
+                if ($request->has('cloudflare_upload_id')) {
+                    // Direct upload from browser - video already uploaded to Cloudflare
+                    $uploadId = $request->cloudflare_upload_id;
+                    
+                    // Get video details from Cloudflare
+                    $videoInfo = $this->getCloudflareVideoInfo($uploadId);
+                    
+                    if ($videoInfo['success']) {
+                        $videoData['video_url'] = $videoInfo['video_url'];
+                        $videoData['cloudflare_video_id'] = $videoInfo['video_id'];
+                        $videoData['thumbnail_url'] = $videoInfo['thumbnail_url'];
+                        $videoData['file_size'] = $videoInfo['file_size'] ?? null;
+                        $videoData['duration'] = $videoInfo['duration'] ?? $request->duration;
+                        $videoData['upload_status'] = 'completed';
+                        $videoData['upload_progress'] = 100;
+                    } else {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Error retrieving video from Cloudflare: ' . $videoInfo['message']);
+                    }
+                } elseif ($request->hasFile('video_file')) {
+                    // Fallback: Server-side upload for smaller files (< 500MB)
+                    $file = $request->file('video_file');
+                    $fileSize = $file->getSize();
+                    
+                    // For files larger than 500MB, recommend direct upload
+                    if ($fileSize > 500 * 1024 * 1024) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'For files larger than 500MB, please use direct upload. The form will automatically switch to direct upload mode.');
+                    }
+                    
+                    // Store file temporarily
+                    $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
+                    
+                    // Set initial upload status
+                    $videoData['upload_status'] = 'pending';
+                    $videoData['upload_progress'] = 0;
+                    $videoData['file_size'] = $fileSize;
+                    
+                    // Create video record first
+                    $video = Video::create($videoData);
+                    
+                    // Dispatch job to queue for background processing
+                    ProcessVideoUpload::dispatch(
+                        $video,
+                        $tempPath,
+                        $file->getClientOriginalName(),
+                        $fileSize
+                    );
+                    
+                    return redirect()->route('videos.index', $request->course_id)
+                        ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
+                } else {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', 'Please provide a video file for Cloudflare upload.');
+                }
                     
             } elseif ($request->video_type == 1 && $request->video_url) {
                 // YouTube video
@@ -450,6 +485,241 @@ class VideoController extends Controller
         } catch (\Exception $e) {
             Log::error('Video deletion error: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error deleting video: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get direct upload URL from Cloudflare Stream
+     * This allows uploading large files directly from browser to Cloudflare
+     */
+    public function getDirectUploadUrl(Request $request)
+    {
+        try {
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'file_size' => 'nullable|integer|min:0'
+            ]);
+
+            if (!env('CLOUDFLARE_API_TOKEN') || !env('CLOUDFLARE_ACCOUNT_ID')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cloudflare credentials not configured'
+                ], 500);
+            }
+
+            // Build request payload - Cloudflare Stream Direct Upload API format
+            $payload = [
+                'maxDurationSeconds' => 7200, // 2 hours max for large videos
+                'requireSignedURLs' => false,
+            ];
+            
+            // Add video metadata (name/title) - Cloudflare will use this for the video name
+            if ($request->has('title') && !empty($request->title)) {
+                $payload['meta'] = [
+                    'name' => $request->title
+                ];
+            }
+            
+            // For large files, increase timeout and remove allowedOrigins (can cause issues)
+            $fileSize = $request->input('file_size', 0);
+            $largeFileThreshold = 500 * 1024 * 1024; // 500MB
+            
+            if ($fileSize > $largeFileThreshold) {
+                // For large files, don't use allowedOrigins (can cause 400 errors)
+                // Increase max duration
+                $payload['maxDurationSeconds'] = 14400; // 4 hours for very large files
+            } else {
+                // For smaller files, try to add allowedOrigins if APP_URL is set
+                $appUrl = env('APP_URL');
+                if ($appUrl) {
+                    $parsed = parse_url($appUrl);
+                    if (isset($parsed['host'])) {
+                        $domain = $parsed['host'];
+                        $domain = preg_replace('/^www\./', '', $domain);
+                        $payload['allowedOrigins'] = [$domain];
+                    }
+                }
+            }
+
+            // Create direct creator upload URL
+            $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+                ->withHeaders([
+                    'Content-Type' => 'application/json'
+                ])
+                ->post("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/direct_upload", $payload);
+
+            $data = $response->json();
+            
+            // Log full response for debugging
+            Log::info('Cloudflare Direct Upload Response', [
+                'status' => $response->status(),
+                'response' => $data,
+                'payload' => $payload
+            ]);
+
+            // If request failed and we included allowedOrigins, try without it
+            if (!$response->successful() && isset($payload['allowedOrigins'])) {
+                Log::info('Retrying without allowedOrigins');
+                unset($payload['allowedOrigins']);
+                
+                $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+                    ->withHeaders([
+                        'Content-Type' => 'application/json'
+                    ])
+                    ->post("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/direct_upload", $payload);
+                
+                $data = $response->json();
+                
+                Log::info('Cloudflare Direct Upload Retry Response', [
+                    'status' => $response->status(),
+                    'response' => $data,
+                    'payload' => $payload
+                ]);
+            }
+
+            if ($response->successful() && isset($data['result'])) {
+                $result = $data['result'];
+                
+                return response()->json([
+                    'success' => true,
+                    'upload_url' => $result['uploadURL'] ?? $result['uploadUrl'] ?? null,
+                    'video_id' => $result['uid'] ?? null,
+                    'message' => 'Direct upload URL created successfully'
+                ]);
+            } else {
+                // Better error message extraction
+                $errorMessage = 'Unknown error';
+                if (isset($data['errors']) && is_array($data['errors'])) {
+                    $messages = [];
+                    foreach ($data['errors'] as $error) {
+                        if (isset($error['message'])) {
+                            $messages[] = $error['message'];
+                        } elseif (is_string($error)) {
+                            $messages[] = $error;
+                        }
+                    }
+                    $errorMessage = !empty($messages) ? implode(', ', $messages) : 'Bad Request';
+                } elseif (isset($data['messages']) && is_array($data['messages'])) {
+                    $messages = [];
+                    foreach ($data['messages'] as $message) {
+                        if (isset($message['message'])) {
+                            $messages[] = $message['message'];
+                        }
+                    }
+                    $errorMessage = !empty($messages) ? implode(', ', $messages) : 'Bad Request';
+                } elseif (isset($data['message'])) {
+                    $errorMessage = $data['message'];
+                }
+                
+                Log::error('Cloudflare Direct Upload Failed', [
+                    'status' => $response->status(),
+                    'error' => $errorMessage,
+                    'full_response' => $data
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create upload URL: ' . $errorMessage,
+                    'details' => $data['errors'] ?? $data['messages'] ?? null
+                ], $response->status() ?: 500);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Direct upload URL creation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating upload URL: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get video information from Cloudflare after direct upload
+     */
+    private function getCloudflareVideoInfo($videoId)
+    {
+        try {
+            if (!env('CLOUDFLARE_API_TOKEN') || !env('CLOUDFLARE_ACCOUNT_ID')) {
+                return [
+                    'success' => false,
+                    'message' => 'Cloudflare credentials not configured'
+                ];
+            }
+
+            $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+                ->get("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/" . $videoId);
+
+            $data = $response->json();
+
+            if ($response->successful() && isset($data['result'])) {
+                $result = $data['result'];
+                
+                return [
+                    'success' => true,
+                    'video_id' => $result['uid'],
+                    'video_url' => $result['playback']['hls'],
+                    'thumbnail_url' => $result['thumbnail'] ?? null,
+                    'file_size' => isset($result['size']) ? (int)$result['size'] : null,
+                    'duration' => isset($result['duration']) ? (int)$result['duration'] : null,
+                ];
+            } else {
+                $errorMessage = isset($data['errors']) ? implode(', ', array_column($data['errors'], 'message')) : 'Unknown error';
+                return [
+                    'success' => false,
+                    'message' => 'Failed to get video info: ' . $errorMessage
+                ];
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Get Cloudflare video info error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Error getting video info: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Handle Cloudflare webhook callback when video upload completes
+     */
+    public function cloudflareWebhook(Request $request)
+    {
+        try {
+            // Verify webhook signature (optional but recommended)
+            // You can add signature verification here for security
+            
+            $data = $request->all();
+            
+            Log::info('Cloudflare webhook received: ' . json_encode($data));
+
+            // Find video by Cloudflare video ID
+            if (isset($data['uid'])) {
+                $video = Video::where('cloudflare_video_id', $data['uid'])->first();
+                
+                if ($video) {
+                    // Update video with final details
+                    $videoInfo = $this->getCloudflareVideoInfo($data['uid']);
+                    
+                    if ($videoInfo['success']) {
+                        $video->update([
+                            'video_url' => $videoInfo['video_url'],
+                            'thumbnail_url' => $videoInfo['thumbnail_url'],
+                            'file_size' => $videoInfo['file_size'],
+                            'duration' => $videoInfo['duration'] ?? $video->duration,
+                            'upload_status' => 'completed',
+                            'upload_progress' => 100
+                        ]);
+                        
+                        Log::info("Video {$video->id} updated from webhook");
+                    }
+                }
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            Log::error('Cloudflare webhook error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 

@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('videos', function (Blueprint $table) {
-            $table->string('upload_status')->default('pending')->after('video_url'); // pending, processing, completed, failed
-            $table->integer('upload_progress')->default(0)->after('upload_status'); // 0-100
-            $table->text('upload_error')->nullable()->after('upload_progress');
+            // PostgreSQL doesn't support 'after()', columns will be added at the end
+            $table->string('upload_status')->default('pending'); // pending, processing, completed, failed
+            $table->integer('upload_progress')->default(0); // 0-100
+            $table->text('upload_error')->nullable();
         });
     }
 
@@ -24,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('videos', function (Blueprint $table) {
-            $table->dropColumn(['upload_status', 'upload_progress', 'upload_error']);
+           $table->dropColumn(['upload_status', 'upload_progress', 'upload_error']);
         });
     }
 };

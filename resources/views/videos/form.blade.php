@@ -324,31 +324,224 @@
             const uploadOverlay = document.getElementById('uploadOverlay');
             const progressBar = document.getElementById('uploadProgressBar');
             
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 const videoType = document.getElementById('video_type').value;
                 const videoFile = document.getElementById('video_file').files[0];
+                const title = document.getElementById('title').value;
                 
-                // Only show progress for Cloudflare uploads with file
+                // Handle Cloudflare direct upload for large files (> 500MB)
                 if (videoType == '2' && videoFile) {
-                    // Show upload overlay
-                    uploadOverlay.style.display = 'flex';
+                    const fileSizeMB = videoFile.size / (1024 * 1024);
+                    const largeFileThreshold = 5; // 5MB
                     
-                    // Simulate progress (since we can't track actual upload progress easily)
-                    let progress = 0;
-                    const interval = setInterval(function() {
-                        if (progress < 90) {
-                            progress += Math.random() * 10;
-                            if (progress > 90) progress = 90;
-                            progressBar.style.width = progress + '%';
-                            progressBar.textContent = Math.round(progress) + '%';
-                            progressBar.setAttribute('aria-valuenow', progress);
-                        }
-                    }, 500);
-                    
-                    // Store interval ID to clear it if needed
-                    form.dataset.progressInterval = interval;
+                    if (fileSizeMB > largeFileThreshold) {
+                        // Use direct upload for large files
+                        e.preventDefault();
+                        await handleDirectUpload(videoFile, title);
+                        return false;
+                    } else {
+                        // Show progress for regular upload
+                        uploadOverlay.style.display = 'flex';
+                        
+                        // Simulate progress
+                        let progress = 0;
+                        const interval = setInterval(function() {
+                            if (progress < 90) {
+                                progress += Math.random() * 10;
+                                if (progress > 90) progress = 90;
+                                progressBar.style.width = progress + '%';
+                                progressBar.textContent = Math.round(progress) + '%';
+                                progressBar.setAttribute('aria-valuenow', progress);
+                            }
+                        }, 500);
+                        
+                        form.dataset.progressInterval = interval;
+                    }
                 }
             });
+            
+            // Handle direct upload to Cloudflare
+            async function handleDirectUpload(file, title) {
+                try {
+                    // Show upload overlay
+                    uploadOverlay.style.display = 'flex';
+                    progressBar.style.width = '5%';
+                    progressBar.textContent = '5%';
+                    progressBar.setAttribute('aria-valuenow', 5);
+                    
+                    // Step 1: Get direct upload URL
+                    progressBar.textContent = 'Getting upload URL...';
+                    const response = await fetch('{{ route("videos.direct-upload-url") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            file_size: file.size
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to get upload URL');
+                    }
+                    
+                    // Step 2: Upload directly to Cloudflare with progress tracking
+                    progressBar.textContent = 'Uploading to Cloudflare...';
+                    progressBar.style.width = '10%';
+                    
+                    // Function to upload file
+                    const uploadFile = async (useFormData = false) => {
+                        return new Promise((resolve, reject) => {
+                            const xhr = new XMLHttpRequest();
+                            
+                            // Track upload progress
+                            xhr.upload.addEventListener('progress', function(e) {
+                                if (e.lengthComputable) {
+                                    const percentComplete = Math.round((e.loaded / e.total) * 90) + 10; // 10-100%
+                                    progressBar.style.width = percentComplete + '%';
+                                    progressBar.textContent = percentComplete + '%';
+                                    progressBar.setAttribute('aria-valuenow', percentComplete);
+                                }
+                            });
+                            
+                            xhr.addEventListener('load', function() {
+                                console.log('Upload response status:', xhr.status);
+                                console.log('Upload response:', xhr.responseText);
+                                
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    try {
+                                        const responseText = xhr.responseText;
+                                        if (responseText) {
+                                            const result = JSON.parse(responseText);
+                                            console.log('Parsed upload result:', result);
+                                            resolve(result);
+                                        } else {
+                                            resolve(null);
+                                        }
+                                    } catch (e) {
+                                        console.log('Upload response (non-JSON):', xhr.responseText);
+                                        resolve(null);
+                                    }
+                                } else {
+                                    let errorMsg = 'Upload failed with status: ' + xhr.status;
+                                    let errorDetails = '';
+                                    
+                                    try {
+                                        const errorResponse = JSON.parse(xhr.responseText);
+                                        console.error('Cloudflare upload error:', errorResponse);
+                                        
+                                        if (errorResponse.errors && errorResponse.errors.length > 0) {
+                                            errorDetails = errorResponse.errors.map(e => e.message || e).join(', ');
+                                            errorMsg += ' - ' + errorDetails;
+                                        } else if (errorResponse.message) {
+                                            errorMsg += ' - ' + errorResponse.message;
+                                        } else {
+                                            errorMsg += ' - ' + JSON.stringify(errorResponse);
+                                        }
+                                    } catch (e) {
+                                        errorMsg += ' - ' + xhr.responseText;
+                                    }
+                                    
+                                    console.error('Upload failed:', errorMsg);
+                                    reject(new Error(errorMsg));
+                                }
+                            });
+                            
+                            xhr.addEventListener('error', function() {
+                                reject(new Error('Network error during upload'));
+                            });
+                            
+                            xhr.addEventListener('abort', function() {
+                                reject(new Error('Upload aborted'));
+                            });
+                            
+                            xhr.addEventListener('timeout', function() {
+                                reject(new Error('Upload timeout - file may be too large'));
+                            });
+                            
+                            // Set timeout for large files (2 hours)
+                            xhr.timeout = 7200000; // 2 hours in milliseconds
+                            
+                            // Open connection
+                            xhr.open('POST', data.upload_url);
+                            
+                            // Try different upload methods
+                            if (useFormData) {
+                                // Method 1: FormData (multipart/form-data)
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                xhr.send(formData);
+                            } else {
+                                // Method 2: Raw file (binary)
+                                // Don't set Content-Type - let browser set it
+                                xhr.send(file);
+                            }
+                        });
+                    };
+                    
+                    // Wait for upload to complete - try raw file first, then FormData if it fails
+                    let uploadResult = null;
+                    try {
+                        uploadResult = await uploadFile(false); // Try raw file first
+                    } catch (error) {
+                        console.log('Raw file upload failed, trying FormData:', error.message);
+                        // If raw file fails with 400, try FormData
+                        if (error.message.includes('400')) {
+                            try {
+                                uploadResult = await uploadFile(true); // Try FormData
+                            } catch (formDataError) {
+                                throw new Error('Upload failed with both methods: ' + formDataError.message);
+                            }
+                        } else {
+                            throw error;
+                        }
+                    }
+                    
+                    // Step 3: Get video ID from upload response or use the one from initial request
+                    progressBar.textContent = 'Processing video...';
+                    progressBar.style.width = '95%';
+                    
+                    // Get video ID - prefer the one from upload response if available
+                    let videoId = data.video_id;
+                    if (uploadResult) {
+                        if (uploadResult.uid) {
+                            videoId = uploadResult.uid;
+                        } else if (uploadResult.result && uploadResult.result.uid) {
+                            videoId = uploadResult.result.uid;
+                        }
+                    }
+                    
+                    // Wait a moment for Cloudflare to process
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    // Step 4: Submit form with Cloudflare video ID
+                    progressBar.textContent = 'Finalizing...';
+                    progressBar.style.width = '100%';
+                    
+                    // Add hidden input with Cloudflare video ID
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'cloudflare_upload_id';
+                    hiddenInput.value = videoId;
+                    form.appendChild(hiddenInput);
+                    
+                    // Remove file input to prevent double upload
+                    const fileInput = document.getElementById('video_file');
+                    fileInput.value = '';
+                    
+                    // Submit form
+                    form.submit();
+                    
+                } catch (error) {
+                    console.error('Direct upload error:', error);
+                    uploadOverlay.style.display = 'none';
+                    alert('Upload failed: ' + error.message + '\n\nPlease try again or use a smaller file.');
+                }
+            }
         });
 
         // Toggle video input fields based on video type

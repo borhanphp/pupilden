@@ -55,6 +55,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('courses', CourseController::class);
         Route::resource('videos', VideoController::class);
         Route::post('videos/update-order', [VideoController::class, 'updateOrder'])->name('videos.update-order');
+        Route::post('videos/direct-upload-url', [VideoController::class, 'getDirectUploadUrl'])->name('videos.direct-upload-url');
+        Route::post('videos/cloudflare-webhook', [VideoController::class, 'cloudflareWebhook'])->name('videos.cloudflare-webhook');
         Route::resource('exams', ExamController::class);
         Route::post('exams/{exam}/toggle-published', [ExamController::class, 'togglePublished'])->name('exams.toggle-published');
         Route::resource('questions', QuestionController::class);
