@@ -2,12 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
-class Student extends Authenticatable
+class Student extends Authenticatable implements CanResetPassword
 {
     use HasApiTokens;
+
+    /**
+     * Get the e-mail address where password reset links are sent.
+     */
+    public function getEmailForPasswordReset(): string
+    {
+        return (string) ($this->email ?? '');
+    }
 
     protected $fillable = [
         'organization_id',

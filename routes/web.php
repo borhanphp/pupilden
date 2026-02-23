@@ -27,8 +27,13 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OrganizationSettingController;
 use App\Http\Controllers\StudentCourseController;
 use App\Http\Controllers\PaymentGatewayController;
+use App\Http\Controllers\GoogleOAuthController;
 
-
+// Google OAuth for Gmail (obtain refresh token – callback must match GOOGLE_REDIRECT_URI in .env)
+Route::get('google/oauth', [GoogleOAuthController::class, 'redirect'])->name('google.oauth');
+Route::get('google/callback', [GoogleOAuthController::class, 'callback'])->name('google.callback');
+// Support /oauth/callback if that's what's configured in Google Cloud Console
+Route::get('oauth/callback', [GoogleOAuthController::class, 'callback'])->name('oauth.callback');
 
 // Authorization routes
 Route::middleware(['auth'])->group(function () {

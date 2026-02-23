@@ -21,7 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('student')->group(function () {
     Route::post('/register', [StudentAuthController::class, 'register']);
     Route::post('/login', [StudentAuthController::class, 'login']);
-
+    Route::post('/forgot-password', [StudentAuthController::class, 'forgot_password']);
+    Route::post('/reset-password-using-token', [StudentAuthController::class, 'reset_password_using_token']);
     Route::middleware('auth:student')->group(function () {
         Route::post('/profile_update', [StudentAuthController::class, 'profile_update']);
         Route::get('/me', [StudentAuthController::class, 'me']);

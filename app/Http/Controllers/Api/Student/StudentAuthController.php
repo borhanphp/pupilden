@@ -11,9 +11,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use App\Mail\PasswordResetLink;
+use App\Services\GmailService;
 
 class StudentAuthController extends BaseController
 {
+    protected $gmailService;
+
+    public function __construct(GmailService $gmailService)
+    {
+        $this->gmailService = $gmailService;
+    }
+
     public function register(Request $request)
     {
         try{
@@ -204,23 +212,72 @@ class StudentAuthController extends BaseController
         }
     }
 
-    /* send password reset tockern to email */
-    public function send_password_reset_token(Request $request)
-    {
+    /* forgot password */
+    public function forgot_password(Request $request){
         try{
             $request->validate([
+                'domain_name' => 'required|string|exists:domains',
                 'email' => 'required|email',
             ]);
-            $student = Student::where('email', $request->email)->first();
+            $domain = Domain::where('domain_name', $request->domain_name)->firstOrFail();
+
+            $student = Student::where('organization_id', $domain->organization_id)
+                ->where(function($query) use ($request){
+                    $query->where('email', $request->email);
+                })
+                ->first();
             if(!$student){
                 return $this->error('Student not found', ['error' => 'Student not found']);
             }
-            $token = Password::createToken($student);
-            Mail::to($student->email)->send(new PasswordResetLink($token, $student));
+            $token = Password::broker('students')->createToken($student);
+            $this->gmailService->send(
+                $student->email,
+                'Password Reset',
+                'Click the link to reset your password: ' . url('reset-password?token=' . $token),
+            );
             return $this->success('Password reset token sent successfully', ['message' => 'Password reset link has been sent to your email']);
         }
         catch(\Exception $e){
-            return $this->error('Password reset token send failed', ['error' => $e->getMessage()]);
+            return $this->error('Forgot password failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    /* reset password using token */
+    public function reset_password_using_token(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'token' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed',
+            ]);
+
+            $status = Password::broker('students')->reset(
+                [
+                    'email' => $request->email,
+                    'token' => $request->token,
+                    'password' => $request->new_password,
+                    'password_confirmation' => $request->new_password_confirmation,
+                ],
+                function ($student, $password) {
+                    $student->forceFill(['password' => Hash::make($password)])->save();
+                }
+            );
+
+            if ($status !== Password::PASSWORD_RESET) {
+                if ($status === Password::INVALID_USER) {
+                    return $this->error('Student not found', ['error' => 'No student found with this email.']);
+                }
+                if ($status === Password::INVALID_TOKEN) {
+                    return $this->error('Invalid or expired token', ['error' => 'The reset link is invalid or has expired. Request a new one.']);
+                }
+                return $this->error('Password reset failed', ['error' => 'Unable to reset password.']);
+            }
+
+            $student = Student::where('email', $request->email)->first();
+            return $this->success('Password reset successfully', ['student' => $student]);
+        } catch (\Exception $e) {
+            return $this->error('Password reset failed', ['error' => $e->getMessage()]);
         }
     }
 }
