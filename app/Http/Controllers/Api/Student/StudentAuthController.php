@@ -233,7 +233,7 @@ class StudentAuthController extends BaseController
             $this->gmailService->send(
                 $student->email,
                 'Password Reset',
-                'Click the link to reset your password: ' . env('STUDENT_PASSWORD_RESET_URL') . '/reset-password?token=' . $token,
+                'Click the link to reset your password: ' . env('STUDENT_PASSWORD_RESET_URL') . '/reset-password?token=' . $token.'&email=' . $student->email,
             );
             return $this->success('Password reset token sent successfully', ['message' => 'Password reset link has been sent to your email']);
         }
