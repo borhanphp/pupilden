@@ -85,6 +85,12 @@
             <a href="{{route('media.index')}}">
               <span class="sub-item">Media</span>
             </a>
+          </li>
+          <li>
+            <a href="{{route('sliders.index')}}">
+              <span class="sub-item">Sliders</span>
+            </a>
+          </li>
         </ul>
       </div>
     </li>

@@ -28,6 +28,7 @@ use App\Http\Controllers\OrganizationSettingController;
 use App\Http\Controllers\StudentCourseController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\GoogleOAuthController;
+use App\Http\Controllers\SliderController;
 
 // Google OAuth for Gmail (obtain refresh token – callback must match GOOGLE_REDIRECT_URI in .env)
 Route::get('google/oauth', [GoogleOAuthController::class, 'redirect'])->name('google.oauth');
@@ -93,6 +94,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('payment-gateways/{paymentGateway}/toggle-active', [PaymentGatewayController::class, 'toggleActive'])->name('payment-gateways.toggle-active');
         Route::put('payment-gateways/{paymentGateway}/set-default', [PaymentGatewayController::class, 'setDefault'])->name('payment-gateways.set-default');
 
+        Route::resource('sliders', SliderController::class)->except(['show']);
 });
 
 
