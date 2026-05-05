@@ -2,7 +2,11 @@
 nixPkgs = ["nodejs_22"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = [
+  "composer install --no-dev --optimize-autoloader",
+  "npm install --include=dev"
+]
 
 [phases.build]
 cmds = ["npm run build"]
+
