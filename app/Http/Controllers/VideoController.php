@@ -33,7 +33,7 @@ class VideoController extends Controller
     public function index(Request $request, $courseId = null)
     {
 
-        
+
         try {
             $query = Video::with(['course', 'creator', 'updater']);
 
@@ -41,11 +41,11 @@ class VideoController extends Controller
                 // Get videos for a specific course
                 $course = Course::where('organization_id', auth()->user()->organization_id)
                     ->findOrFail($courseId);
-                
+
                 $query->where('course_id', $courseId);
             } else {
                 // Get all videos for the organization
-                $query->whereHas('course', function($q) {
+                $query->whereHas('course', function ($q) {
                     $q->where('organization_id', auth()->user()->organization_id);
                 });
             }
@@ -142,10 +142,10 @@ class VideoController extends Controller
                 if ($request->has('cloudflare_upload_id')) {
                     // Direct upload from browser - video already uploaded to Cloudflare
                     $uploadId = $request->cloudflare_upload_id;
-                    
+
                     // Get video details from Cloudflare
                     $videoInfo = $this->getCloudflareVideoInfo($uploadId);
-                    
+
                     if ($videoInfo['success']) {
                         $videoData['video_url'] = $videoInfo['video_url'];
                         $videoData['cloudflare_video_id'] = $videoInfo['video_id'];
@@ -163,25 +163,25 @@ class VideoController extends Controller
                     // Fallback: Server-side upload for smaller files (< 500MB)
                     $file = $request->file('video_file');
                     $fileSize = $file->getSize();
-                    
+
                     // For files larger than 500MB, recommend direct upload
                     if ($fileSize > 500 * 1024 * 1024) {
                         return redirect()->back()
                             ->withInput()
                             ->with('error', 'For files larger than 500MB, please use direct upload. The form will automatically switch to direct upload mode.');
                     }
-                    
+
                     // Store file temporarily
                     $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
-                    
+
                     // Set initial upload status
                     $videoData['upload_status'] = 'pending';
                     $videoData['upload_progress'] = 0;
                     $videoData['file_size'] = $fileSize;
-                    
+
                     // Create video record first
                     $video = Video::create($videoData);
-                    
+
                     // Dispatch job to queue for background processing
                     ProcessVideoUpload::dispatch(
                         $video,
@@ -189,7 +189,7 @@ class VideoController extends Controller
                         $file->getClientOriginalName(),
                         $fileSize
                     );
-                    
+
                     return redirect()->route('videos.index', $request->course_id)
                         ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
                 } else {
@@ -197,7 +197,7 @@ class VideoController extends Controller
                         ->withInput()
                         ->with('error', 'Please provide a video file for Cloudflare upload.');
                 }
-                    
+
             } elseif ($request->video_type == 1 && $request->video_url) {
                 // YouTube video
                 $videoData['video_url'] = $request->video_url;
@@ -243,7 +243,7 @@ class VideoController extends Controller
 
             // Get the file's temporary path directly
             $tempPath = $file->getRealPath();
-            
+
             // Verify the file exists
             if (!file_exists($tempPath)) {
                 return [
@@ -264,14 +264,14 @@ class VideoController extends Controller
 
             if ($response->successful() && isset($data['result'])) {
                 $result = $data['result'];
-                
+
                 return [
                     'success' => true,
                     'video_id' => $result['uid'],
                     'video_url' => $result['playback']['hls'],
                     'thumbnail_url' => $result['thumbnail'],
                     'file_size' => $file->getSize(),
-                    'duration' => isset($result['duration']) ? (int)$result['duration'] : null,
+                    'duration' => isset($result['duration']) ? (int) $result['duration'] : null,
                     'message' => 'Video uploaded successfully to Cloudflare'
                 ];
             } else {
@@ -299,7 +299,7 @@ class VideoController extends Controller
         try {
             // Verify video belongs to organization
             $video->load(['course', 'creator', 'updater']);
-            
+
             if ($video->course->organization_id !== auth()->user()->organization_id) {
                 abort(403, 'Unauthorized');
             }
@@ -382,7 +382,7 @@ class VideoController extends Controller
                 if ($video->preview_image && Storage::disk('public')->exists($video->preview_image)) {
                     Storage::disk('public')->delete($video->preview_image);
                 }
-                
+
                 $previewImage = $request->file('preview_image');
                 $previewImageName = time() . '_' . $previewImage->getClientOriginalName();
                 $previewImagePath = $previewImage->storeAs('video-previews', $previewImageName, 'public');
@@ -394,18 +394,18 @@ class VideoController extends Controller
                 // Cloudflare Stream - only upload if new file provided
                 if ($request->hasFile('video_file')) {
                     $file = $request->file('video_file');
-                    
+
                     // Store file temporarily
                     $tempPath = $file->storeAs('temp_videos', time() . '_' . $file->getClientOriginalName());
-                    
+
                     // Set upload status
                     $videoData['upload_status'] = 'pending';
                     $videoData['upload_progress'] = 0;
                     $videoData['file_size'] = $file->getSize();
-                    
+
                     // Update video record first
                     $video->update($videoData);
-                    
+
                     // Dispatch job to queue for background processing
                     ProcessVideoUpload::dispatch(
                         $video,
@@ -413,7 +413,7 @@ class VideoController extends Controller
                         $file->getClientOriginalName(),
                         $file->getSize()
                     );
-                    
+
                     return redirect()->route('videos.index', $request->course_id)
                         ->with('success', 'Video is being uploaded in the background. You will be notified when it\'s ready.');
                 }
@@ -512,34 +512,35 @@ class VideoController extends Controller
                 'maxDurationSeconds' => 7200, // 2 hours max for large videos
                 'requireSignedURLs' => false,
             ];
-            
+
             // Add video metadata (name/title) - Cloudflare will use this for the video name
             if ($request->has('title') && !empty($request->title)) {
                 $payload['meta'] = [
                     'name' => $request->title
                 ];
             }
-            
-            // For large files, increase timeout and remove allowedOrigins (can cause issues)
+
+            // For large files, increase timeout
             $fileSize = $request->input('file_size', 0);
             $largeFileThreshold = 500 * 1024 * 1024; // 500MB
-            
+
             if ($fileSize > $largeFileThreshold) {
-                // For large files, don't use allowedOrigins (can cause 400 errors)
-                // Increase max duration
                 $payload['maxDurationSeconds'] = 14400; // 4 hours for very large files
-            } else {
-                // For smaller files, try to add allowedOrigins if APP_URL is set
-                $appUrl = env('APP_URL');
-                if ($appUrl) {
-                    $parsed = parse_url($appUrl);
-                    if (isset($parsed['host'])) {
-                        $domain = $parsed['host'];
-                        $domain = preg_replace('/^www\./', '', $domain);
-                        $payload['allowedOrigins'] = [$domain];
+            }
+
+            // Set allowedOrigins to include all domains where videos should play
+            $allowedOrigins = ['localhost', 'rendersden.com'];
+            $appUrl = env('APP_URL');
+            if ($appUrl) {
+                $parsed = parse_url($appUrl);
+                if (isset($parsed['host'])) {
+                    $domain = preg_replace('/^www\./', '', $parsed['host']);
+                    if (!in_array($domain, $allowedOrigins)) {
+                        $allowedOrigins[] = $domain;
                     }
                 }
             }
+            $payload['allowedOrigins'] = $allowedOrigins;
 
             // Create direct creator upload URL
             $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
@@ -549,7 +550,7 @@ class VideoController extends Controller
                 ->post("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/direct_upload", $payload);
 
             $data = $response->json();
-            
+
             // Log full response for debugging
             Log::info('Cloudflare Direct Upload Response', [
                 'status' => $response->status(),
@@ -561,15 +562,15 @@ class VideoController extends Controller
             if (!$response->successful() && isset($payload['allowedOrigins'])) {
                 Log::info('Retrying without allowedOrigins');
                 unset($payload['allowedOrigins']);
-                
+
                 $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
                     ->withHeaders([
                         'Content-Type' => 'application/json'
                     ])
                     ->post("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/direct_upload", $payload);
-                
+
                 $data = $response->json();
-                
+
                 Log::info('Cloudflare Direct Upload Retry Response', [
                     'status' => $response->status(),
                     'response' => $data,
@@ -579,7 +580,7 @@ class VideoController extends Controller
 
             if ($response->successful() && isset($data['result'])) {
                 $result = $data['result'];
-                
+
                 return response()->json([
                     'success' => true,
                     'upload_url' => $result['uploadURL'] ?? $result['uploadUrl'] ?? null,
@@ -610,13 +611,13 @@ class VideoController extends Controller
                 } elseif (isset($data['message'])) {
                     $errorMessage = $data['message'];
                 }
-                
+
                 Log::error('Cloudflare Direct Upload Failed', [
                     'status' => $response->status(),
                     'error' => $errorMessage,
                     'full_response' => $data
                 ]);
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to create upload URL: ' . $errorMessage,
@@ -653,14 +654,14 @@ class VideoController extends Controller
 
             if ($response->successful() && isset($data['result'])) {
                 $result = $data['result'];
-                
+
                 return [
                     'success' => true,
                     'video_id' => $result['uid'],
                     'video_url' => $result['playback']['hls'],
                     'thumbnail_url' => $result['thumbnail'] ?? null,
-                    'file_size' => isset($result['size']) ? (int)$result['size'] : null,
-                    'duration' => isset($result['duration']) ? (int)$result['duration'] : null,
+                    'file_size' => isset($result['size']) ? (int) $result['size'] : null,
+                    'duration' => isset($result['duration']) ? (int) $result['duration'] : null,
                 ];
             } else {
                 $errorMessage = isset($data['errors']) ? implode(', ', array_column($data['errors'], 'message')) : 'Unknown error';
@@ -687,19 +688,19 @@ class VideoController extends Controller
         try {
             // Verify webhook signature (optional but recommended)
             // You can add signature verification here for security
-            
+
             $data = $request->all();
-            
+
             Log::info('Cloudflare webhook received: ' . json_encode($data));
 
             // Find video by Cloudflare video ID
             if (isset($data['uid'])) {
                 $video = Video::where('cloudflare_video_id', $data['uid'])->first();
-                
+
                 if ($video) {
                     // Update video with final details
                     $videoInfo = $this->getCloudflareVideoInfo($data['uid']);
-                    
+
                     if ($videoInfo['success']) {
                         $video->update([
                             'video_url' => $videoInfo['video_url'],
@@ -709,7 +710,7 @@ class VideoController extends Controller
                             'upload_status' => 'completed',
                             'upload_progress' => 100
                         ]);
-                        
+
                         Log::info("Video {$video->id} updated from webhook");
                     }
                 }
@@ -765,7 +766,7 @@ class VideoController extends Controller
 
             foreach ($request->videos as $videoData) {
                 $video = Video::find($videoData['id']);
-                
+
                 // Verify video belongs to organization
                 if ($video->course->organization_id !== auth()->user()->organization_id) {
                     continue;
