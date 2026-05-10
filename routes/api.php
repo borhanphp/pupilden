@@ -73,7 +73,7 @@ Route::get('/courses/categories', [PublicCourseController::class, 'categories'])
 Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
 Route::get('/courses/search', [PublicCourseController::class, 'search']);
 Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);
-
+Route::get('/sliders', [SiteInformationController::class, 'sliders']);
 // Site information routes
 Route::get('/site-information', [SiteInformationController::class, 'siteInformation']);
 Route::get('/payment-gateways', [SiteInformationController::class, 'paymentGateways']);

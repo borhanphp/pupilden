@@ -7,6 +7,7 @@ use App\Http\Controllers\BaseController;
 use App\Models\PaymentGateway;
 use App\Models\Organization;
 use App\Models\Domain;
+use App\Models\Slider;
 class SiteInformationController extends BaseController
 {
     public $organization_id;
@@ -103,6 +104,41 @@ class SiteInformationController extends BaseController
             ]);
         } catch (\Exception $e) {
             return $this->error('Error fetching payment gateways', ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function sliders(Request $request)
+    {
+        try {
+            $domainValidation = $this->validateDomain($request);
+            if (isset($domainValidation['error'])) {
+                return $this->error($domainValidation['error'], ['error' => $domainValidation['error']]);
+            }
+
+            $organization_id = $domainValidation['organization_id'];
+
+            $sliders = Slider::where('organization_id', $organization_id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($slider) {
+                    return [
+                        'id' => $slider->id,
+                        'title' => $slider->title,
+                        'description' => $slider->description,
+                        'image_url' => $slider->image_url,
+                        'sort_order' => $slider->sort_order,
+                        'is_active' => $slider->is_active,
+                    ];
+                })
+                ->values();
+
+            return $this->success('Sliders fetched successfully', [
+                'sliders' => $sliders,
+            ]);
+        } catch (\Exception $e) {
+            return $this->error('Error fetching sliders', ['error' => $e->getMessage()]);
         }
     }
 }
