@@ -8,6 +8,30 @@ use Illuminate\Support\Facades\Storage;
 
 class SliderController extends Controller
 {
+    /**
+     * Remove slider image from disk (supports filename-only like Course, or legacy full storage path).
+     */
+    protected function deleteSliderImageFile(Slider $slider): void
+    {
+        if (! $slider->image) {
+            return;
+        }
+
+        if (str_contains($slider->image, '/')) {
+            if (Storage::disk('public')->exists($slider->image)) {
+                Storage::disk('public')->delete($slider->image);
+            }
+
+            return;
+        }
+
+        $folder = $slider->organization_id.'/sliders';
+        $path = $folder.'/'.$slider->image;
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
     protected function ensureOrganization(Slider $slider): void
     {
         if ($slider->organization_id !== auth()->user()->organization_id) {
@@ -40,16 +64,18 @@ class SliderController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $path = $request->file('image')->store(
-            'sliders/'.auth()->user()->organization_id,
-            'public'
-        );
+        $folder = auth()->user()->organization_id.'/sliders';
+        if (! Storage::disk('public')->exists($folder)) {
+            Storage::disk('public')->makeDirectory($folder);
+        }
+        $imageName = time().'.'.$request->file('image')->getClientOriginalExtension();
+        $request->file('image')->storeAs($folder, $imageName, 'public');
 
         Slider::create([
             'organization_id' => auth()->user()->organization_id,
             'title' => $request->title,
             'description' => $request->description,
-            'image' => $path,
+            'image' => $imageName,
             'sort_order' => $request->input('sort_order', 0),
             'is_active' => $request->has('is_active'),
         ]);
@@ -85,13 +111,16 @@ class SliderController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            if ($slider->image && Storage::disk('public')->exists($slider->image)) {
-                Storage::disk('public')->delete($slider->image);
+            $folder = auth()->user()->organization_id.'/sliders';
+            if (! Storage::disk('public')->exists($folder)) {
+                Storage::disk('public')->makeDirectory($folder);
             }
-            $data['image'] = $request->file('image')->store(
-                'sliders/'.auth()->user()->organization_id,
-                'public'
-            );
+
+            $this->deleteSliderImageFile($slider);
+
+            $imageName = time().'.'.$request->file('image')->getClientOriginalExtension();
+            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $data['image'] = $imageName;
         }
 
         $slider->update($data);
@@ -104,9 +133,7 @@ class SliderController extends Controller
     {
         $this->ensureOrganization($slider);
 
-        if ($slider->image && Storage::disk('public')->exists($slider->image)) {
-            Storage::disk('public')->delete($slider->image);
-        }
+        $this->deleteSliderImageFile($slider);
 
         $slider->delete();
 

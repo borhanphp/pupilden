@@ -32,6 +32,12 @@ class Slider extends Model
             return null;
         }
 
-        return asset('storage/'.$this->image);
+        // Legacy: full path under storage (e.g. sliders/{org}/random-name.jpg)
+        if (str_contains($this->image, '/')) {
+            return asset('storage/'.$this->image);
+        }
+
+        // Same pattern as Course images: filename only + org folder
+        return asset('storage/'.$this->organization_id.'/sliders/'.$this->image);
     }
 }
