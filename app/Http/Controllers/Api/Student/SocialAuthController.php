@@ -114,9 +114,9 @@ class SocialAuthController extends BaseController
 
             return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?token=' . $token . '&student=' . urlencode($studentData));
 
-        } catch (\Exception $e) {
-            Log::error('Social Login Error: ' . $e->getMessage());
-            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Authentication failed. Please try again.'));
+        } catch (\Throwable $e) {
+            Log::error('Social Login Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Authentication failed: ' . $e->getMessage()));
         }
     }
 }
