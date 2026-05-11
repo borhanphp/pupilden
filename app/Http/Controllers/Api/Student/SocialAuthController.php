@@ -24,7 +24,11 @@ class SocialAuthController extends BaseController
         $state = json_encode(['domain_name' => $request->domain_name]);
 
         $redirectUrl = url('/api/student/auth/' . $provider . '/callback');
-        $url = Socialite::driver($provider)->stateless()
+        
+        /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+        $driver = Socialite::driver($provider);
+        
+        $url = $driver->stateless()
             ->redirectUrl($redirectUrl)
             ->with(['state' => $state])
             ->redirect()
@@ -40,7 +44,11 @@ class SocialAuthController extends BaseController
     {
         try {
             $redirectUrl = url('/api/student/auth/' . $provider . '/callback');
-            $socialUser = Socialite::driver($provider)->stateless()->redirectUrl($redirectUrl)->user();
+            
+            /** @var \Laravel\Socialite\Two\AbstractProvider $driver */
+            $driver = Socialite::driver($provider);
+            
+            $socialUser = $driver->stateless()->redirectUrl($redirectUrl)->user();
             
             // Extract state
             $state = json_decode($request->input('state'), true);
