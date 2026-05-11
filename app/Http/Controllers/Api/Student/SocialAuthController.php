@@ -23,9 +23,14 @@ class SocialAuthController extends BaseController
         // Keep domain name in state to know which organization the student is logging into
         $state = json_encode(['domain_name' => $request->domain_name]);
 
-        return response()->json([
-            'url' => Socialite::driver($provider)->stateless()->with(['state' => $state])->redirect()->getTargetUrl(),
-        ]);
+        $redirectUrl = url('/api/student/auth/' . $provider . '/callback');
+        $url = Socialite::driver($provider)->stateless()
+            ->redirectUrl($redirectUrl)
+            ->with(['state' => $state])
+            ->redirect()
+            ->getTargetUrl();
+
+        return redirect()->away($url);
     }
 
     /**
@@ -34,7 +39,8 @@ class SocialAuthController extends BaseController
     public function callback(Request $request, $provider)
     {
         try {
-            $socialUser = Socialite::driver($provider)->stateless()->user();
+            $redirectUrl = url('/api/student/auth/' . $provider . '/callback');
+            $socialUser = Socialite::driver($provider)->stateless()->redirectUrl($redirectUrl)->user();
             
             // Extract state
             $state = json_decode($request->input('state'), true);
