@@ -28,7 +28,9 @@ class Student extends Authenticatable implements CanResetPassword
         'profile_picture',
         'bio',
         'contact_number',
-        'alt_contact_number'
+        'alt_contact_number',
+        'provider_name',
+        'provider_id',
     ];
 
     protected $hidden = ['password'];
