@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Slider;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -143,5 +144,29 @@ class SliderController extends Controller
 
         return redirect()->route('sliders.index')
             ->with('success', 'Slider deleted successfully.');
+    }
+
+    /**
+     * AJAX upload for embedded images in the slider description (Summernote).
+     */
+    public function uploadDescriptionImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
+
+        $orgId = (string) auth()->user()->organization_id;
+        $folder = $orgId.'/sliders/description';
+        if (! Storage::disk('public')->exists($folder)) {
+            Storage::disk('public')->makeDirectory($folder);
+        }
+
+        $extension = $request->file('file')->getClientOriginalExtension() ?: 'jpg';
+        $filename = uniqid('desc_', true).'.'.$extension;
+        $request->file('file')->storeAs($folder, $filename, 'public');
+
+        $url = asset('uploads/'.$folder.'/'.$filename);
+
+        return response()->json(['url' => $url]);
     }
 }

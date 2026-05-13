@@ -31,15 +31,22 @@
                                     @enderror
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
+                                <div class="mb-3 slider-summernote-wrap">
+                                    <label for="description" class="form-label d-flex flex-wrap align-items-center gap-2">
+                                        <span>Description</span>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                id="slider-desc-upload-image">
+                                            Insert image (upload)
+                                        </button>
+                                    </label>
                                     <textarea name="description"
                                               id="description"
-                                              class="form-control @error('description') is-invalid @enderror"
+                                              class="form-control summernote-desc @error('description') is-invalid @enderror"
                                               rows="15"
                                               placeholder="Optional description">{{ old('description', $slider->description ?? '') }}</textarea>
                                     @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -125,3 +132,110 @@
         </div>
     </div>
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('assets/css/summernote-bs5.min.css') }}">
+    <style>
+        /* Toolbar fonts + dropdowns: local CSS uses ./font/ next to this file */
+        .slider-summernote-wrap .note-editor .note-toolbar .dropdown-menu {
+            z-index: 2500;
+        }
+        .slider-summernote-wrap .note-popover.popover {
+            z-index: 2500;
+        }
+        .slider-summernote-wrap .note-modal {
+            z-index: 2600;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('assets/js/plugin/summernote/summernote-bs5.min.js') }}"></script>
+    <script>
+        jQuery(function ($) {
+            var uploadUrl = @json(route('sliders.upload-description-image'));
+            var csrfToken = @json(csrf_token());
+            var $desc = $('#description');
+
+            if (!$desc.length || typeof $.fn.summernote !== 'function') {
+                console.error('Summernote: textarea #description missing or summernote script not loaded.');
+                return;
+            }
+
+            function uploadImage(file, $editor) {
+                var data = new FormData();
+                data.append('file', file);
+                data.append('_token', csrfToken);
+                $.ajax({
+                    url: uploadUrl,
+                    method: 'POST',
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res && res.url) {
+                            $editor.summernote('insertImage', res.url);
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = 'Image upload failed.';
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON.errors.file) {
+                            msg = xhr.responseJSON.errors.file[0];
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        alert(msg);
+                    }
+                });
+            }
+
+            $('#slider-desc-upload-image').on('click', function () {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/jpeg,image/png,image/gif,image/webp';
+                input.onchange = function () {
+                    var file = input.files && input.files[0];
+                    if (file) {
+                        uploadImage(file, $desc);
+                    }
+                };
+                input.click();
+            });
+
+            $desc.closest('form').on('submit', function () {
+                if ($desc.next('.note-editor').length) {
+                    $desc.val($desc.summernote('code'));
+                }
+            });
+
+            try {
+                $desc.summernote({
+                    height: 320,
+                    placeholder: 'Optional description',
+                    disableDragAndDrop: false,
+                    toolbar: [
+                        ['style', ['style']],
+                        ['font', ['bold', 'italic', 'underline', 'clear']],
+                        ['fontname', ['fontname']],
+                        ['fontsize', ['fontsize']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['height', ['height']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'hr']],
+                        ['view', ['fullscreen', 'codeview', 'help']]
+                    ],
+                    callbacks: {
+                        onImageUpload: function (files) {
+                            for (var i = 0; i < files.length; i++) {
+                                uploadImage(files[i], $desc);
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Summernote init failed:', e);
+            }
+        });
+    </script>
+@endpush
