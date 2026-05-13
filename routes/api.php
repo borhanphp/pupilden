@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Student\AIExamGradingController;
 use App\Http\Controllers\Api\Student\PurchasedCourceController;
 use App\Http\Controllers\Api\PublicCourseController;
 use App\Http\Controllers\Api\SiteInformationController;
+use App\Http\Controllers\Api\Student\SocialAuthController;
 
 // Admin API (default users)
 Route::middleware('auth:sanctum')->group(function () {
@@ -24,6 +25,11 @@ Route::prefix('student')->group(function () {
     Route::middleware('throttle:5,1')->post('/login', [StudentAuthController::class, 'login']);
     Route::middleware('throttle:3,1')->post('/forgot-password', [StudentAuthController::class, 'forgot_password']);
     Route::middleware('throttle:3,1')->post('/reset-password-using-token', [StudentAuthController::class, 'reset_password_using_token']);
+
+    // Social Login Routes
+    Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
+    Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
+
     Route::middleware('auth:student')->group(function () {
         Route::post('/profile_update', [StudentAuthController::class, 'profile_update']);
         Route::get('/me', [StudentAuthController::class, 'me']);

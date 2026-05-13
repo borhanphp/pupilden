@@ -43,4 +43,10 @@ return [
         'credentials_path' => env('GOOGLE_AUTH_CONFIG'), // e.g. app/private/google/oauth-credentials.json
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect_uri' => env('FACEBOOK_REDIRECT_URI'),
+    ],
+
 ];
