@@ -38,6 +38,7 @@
                                     <th style="width: 120px;">Image</th>
                                     <th>Title</th>
                                     <th>Description</th>
+                                    <th>Link</th>
                                     <th>Order</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -57,6 +58,13 @@
                                         <td>
                                             @if($slider->description)
                                                 <span class="text-muted">{{ Str::limit(strip_tags($slider->description), 80) }}</span>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($slider->link)
+                                                <a href="{{ $slider->link }}" target="_blank" rel="noopener noreferrer" class="small text-break">{{ Str::limit($slider->link, 48) }}</a>
                                             @else
                                                 <span class="text-muted">—</span>
                                             @endif
@@ -86,7 +94,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="7" class="text-center text-muted py-4">
                                             <i class="fas fa-images fa-3x mb-3 d-block"></i>
                                             <p>No sliders yet.</p>
                                             <a href="{{ route('sliders.create') }}" class="btn btn-primary">

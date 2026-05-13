@@ -59,6 +59,7 @@ class SliderController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'link' => 'nullable|string|max:600',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -75,6 +76,7 @@ class SliderController extends Controller
             'organization_id' => auth()->user()->organization_id,
             'title' => $request->title,
             'description' => $request->description,
+            'link' => ($link = trim((string) $request->input('link', ''))) !== '' ? $link : null,
             'image' => $imageName,
             'sort_order' => $request->input('sort_order', 0),
             'is_active' => $request->has('is_active'),
@@ -98,6 +100,7 @@ class SliderController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'link' => 'nullable|string|max:600',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -106,6 +109,7 @@ class SliderController extends Controller
         $data = [
             'title' => $request->title,
             'description' => $request->description,
+            'link' => ($link = trim((string) $request->input('link', ''))) !== '' ? $link : null,
             'sort_order' => $request->input('sort_order', $slider->sort_order),
             'is_active' => $request->has('is_active'),
         ];

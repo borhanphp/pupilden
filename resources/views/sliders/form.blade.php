@@ -42,6 +42,23 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+
+                                <div class="mb-3">
+                                    <label for="link" class="form-label">Link URL</label>
+                                    <input type="text"
+                                           name="link"
+                                           id="link"
+                                           value="{{ old('link', $slider->link ?? '') }}"
+                                           class="form-control @error('link') is-invalid @enderror"
+                                           placeholder="https://… or /path (optional)"
+                                           maxlength="600"
+                                           inputmode="url"
+                                           autocomplete="off">
+                                    <div class="form-text">Optional. Opens when the slide is clicked on the site.</div>
+                                    @error('link')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
                             <div class="col-md-4">
