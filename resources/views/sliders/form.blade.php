@@ -36,7 +36,7 @@
                                     <textarea name="description"
                                               id="description"
                                               class="form-control @error('description') is-invalid @enderror"
-                                              rows="5"
+                                              rows="15"
                                               placeholder="Optional description">{{ old('description', $slider->description ?? '') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>

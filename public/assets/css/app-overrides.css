@@ -1,0 +1,20 @@
+/**
+ * Textarea resizing / sizing fixes (KaiAdmin + Bootstrap .form-control):
+ *
+ * 1) KaiAdmin sets `.form-control { height: inherit !important }`, which fights
+ *    user-resized / intrinsic textarea height.
+ * 2) Bootstrap sets `.form-control { appearance: none }`, which on WebKit can
+ *    strip the native multiline control (including the resize handle).
+ *
+ * Keep this file loaded last in <head> (after @stack('styles')) so it wins.
+ */
+textarea.form-control,
+textarea.form-control-sm,
+textarea.form-control-lg {
+  height: auto !important;
+  appearance: auto;
+  -webkit-appearance: textarea;
+  -moz-appearance: textfield-multiline;
+  resize: vertical !important;
+  overflow: auto !important;
+}
