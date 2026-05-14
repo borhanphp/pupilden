@@ -124,9 +124,9 @@
                                 </div>
                                 <div class="card-body text-center">
                                     @if($student->profile_picture)
-                                        <img src="{{ asset('storage/' . $student->profile_picture) }}" 
-                                             alt="{{ $student->name }}" 
-                                             class="img-fluid rounded" 
+                                        <img src="{{ \Storage::disk('r2')->url($student->organization_id . '/profile_pictures/' . $student->profile_picture) }}"
+                                             alt="{{ $student->name }}"
+                                             class="img-fluid rounded"
                                              style="max-height: 200px;">
                                     @else
                                         <div class="bg-light d-flex align-items-center justify-content-center rounded" 

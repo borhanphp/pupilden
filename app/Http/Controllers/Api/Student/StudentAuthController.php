@@ -230,10 +230,11 @@ class StudentAuthController extends BaseController
                 return $this->error('Student not found', ['error' => 'Student not found']);
             }
             $token = Password::broker('students')->createToken($student);
+            $resetUrl = rtrim(config('app.student_password_reset_url'), '/') . '/reset-password?token=' . $token . '&email=' . urlencode($student->email);
             $this->gmailService->send(
                 $student->email,
                 'Password Reset',
-                'Click the link to reset your password: ' . env('STUDENT_PASSWORD_RESET_URL') . '/reset-password?token=' . $token.'&email=' . $student->email,
+                'Click the link to reset your password: ' . $resetUrl,
             );
             return $this->success('Password reset token sent successfully', ['message' => 'Password reset link has been sent to your email']);
         }
