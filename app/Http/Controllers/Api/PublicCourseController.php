@@ -8,6 +8,7 @@ use App\Models\CourseCategory;
 use App\Models\CourseSubCategory;
 use Illuminate\Http\Request;
 use App\Models\Domain;
+use Illuminate\Support\Facades\Storage;
 
 class PublicCourseController extends BaseController
 {
@@ -107,7 +108,7 @@ class PublicCourseController extends BaseController
                     'level' => $course->level,
                     'language' => $course->language,
                     'price' => $course->price,
-                    'image_url' => $course->image ? asset('uploads/' . $organization_id . '/course_images/' . $course->image) : null,
+                    'image_url' => $course->image ? Storage::disk('r2')->url($organization_id . '/course_images/' . $course->image) : null,
                     'category' => $course->courseCategory ? [
                         'id' => $course->courseCategory->id,
                         'name' => $course->courseCategory->name,
@@ -177,7 +178,7 @@ class PublicCourseController extends BaseController
                     'level' => $course->level,
                     'language' => $course->language,
                     'price' => $course->price,
-                    'image_url' => $course->image ? asset('uploads/' . $organization_id . '/course_images/' . $course->image) : null,
+                    'image_url' => $course->image ? Storage::disk('r2')->url($organization_id . '/course_images/' . $course->image) : null,
                     'category' => $course->courseCategory ? [
                         'id' => $course->courseCategory->id,
                         'name' => $course->courseCategory->name,
@@ -231,7 +232,7 @@ class PublicCourseController extends BaseController
                 'level' => $course->level,
                 'language' => $course->language,
                 'price' => $course->price,
-                'image_url' => $course->image ? asset('uploads/' . $organization_id . '/course_images/' . $course->image) : null,
+                'image_url' => $course->image ? Storage::disk('r2')->url($organization_id . '/course_images/' . $course->image) : null,
                 'category' => $course->courseCategory ? [
                     'id' => $course->courseCategory->id,
                     'name' => $course->courseCategory->name,
@@ -376,7 +377,7 @@ class PublicCourseController extends BaseController
                     'level' => $course->level,
                     'language' => $course->language,
                     'price' => $course->price,
-                    'image_url' => $course->image ? asset('uploads/' . $organization_id . '/course_images/' . $course->image) : null,
+                    'image_url' => $course->image ? Storage::disk('r2')->url($organization_id . '/course_images/' . $course->image) : null,
                     'sub_category' => $course->courseSubCategory ? [
                         'id' => $course->courseSubCategory->id,
                         'name' => $course->courseSubCategory->name,
@@ -458,7 +459,7 @@ class PublicCourseController extends BaseController
                     'level' => $course->level,
                     'language' => $course->language,
                     'price' => $course->price,
-                    'image_url' => $course->image ? asset('uploads/' . $organization_id . '/course_images/' . $course->image) : null,
+                    'image_url' => $course->image ? Storage::disk('r2')->url($organization_id . '/course_images/' . $course->image) : null,
                     'category' => $course->courseCategory ? [
                         'id' => $course->courseCategory->id,
                         'name' => $course->courseCategory->name,

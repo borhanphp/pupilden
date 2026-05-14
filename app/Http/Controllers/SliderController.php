@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class SliderController extends Controller
 {
     /**
-     * Remove slider image from disk (supports filename-only like Course, or legacy full storage path).
+     * Remove slider image from R2.
      */
     protected function deleteSliderImageFile(Slider $slider): void
     {
@@ -17,19 +17,11 @@ class SliderController extends Controller
             return;
         }
 
-        if (str_contains($slider->image, '/')) {
-            if (Storage::disk('public')->exists($slider->image)) {
-                Storage::disk('public')->delete($slider->image);
-            }
+        $path = str_contains($slider->image, '/')
+            ? $slider->image
+            : $slider->organization_id.'/sliders/'.$slider->image;
 
-            return;
-        }
-
-        $folder = $slider->organization_id.'/sliders';
-        $path = $folder.'/'.$slider->image;
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
+        Storage::disk('r2')->delete($path);
     }
 
     protected function ensureOrganization(Slider $slider): void
@@ -65,11 +57,8 @@ class SliderController extends Controller
         ]);
 
         $folder = auth()->user()->organization_id.'/sliders';
-        if (! Storage::disk('public')->exists($folder)) {
-            Storage::disk('public')->makeDirectory($folder);
-        }
         $imageName = time().'.'.$request->file('image')->getClientOriginalExtension();
-        $request->file('image')->storeAs($folder, $imageName, 'public');
+        $request->file('image')->storeAs($folder, $imageName, 'r2');
 
         Slider::create([
             'organization_id' => auth()->user()->organization_id,
@@ -112,14 +101,11 @@ class SliderController extends Controller
 
         if ($request->hasFile('image')) {
             $folder = auth()->user()->organization_id.'/sliders';
-            if (! Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
-            }
 
             $this->deleteSliderImageFile($slider);
 
             $imageName = time().'.'.$request->file('image')->getClientOriginalExtension();
-            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $request->file('image')->storeAs($folder, $imageName, 'r2');
             $data['image'] = $imageName;
         }
 

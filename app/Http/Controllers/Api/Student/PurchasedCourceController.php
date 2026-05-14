@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Student;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CoursePurchase;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CourseSubCategory;
@@ -100,7 +101,7 @@ class PurchasedCourceController extends Controller
                         'name' => $purchase->course->name,
                         'slug' => $purchase->course->slug,
                         'description' => $purchase->course->description,
-                        'image_url' => $purchase->course->image ? asset('storage/' . $purchase->course->image) : null,
+                        'image_url' => $purchase->course->image ? Storage::disk('r2')->url($purchase->course->organization_id . '/course_images/' . $purchase->course->image) : null,
                         'duration' => $purchase->course->duration,
                         'level' => $purchase->course->level,
                         'language' => $purchase->course->language,
@@ -229,7 +230,7 @@ class PurchasedCourceController extends Controller
                         'name' => $course->name,
                         'slug' => $course->slug,
                         'description' => $course->description,
-                        'image_url' => $course->image ? asset('storage/' . $course->image) : null,
+                        'image_url' => $course->image ? Storage::disk('r2')->url($course->organization_id . '/course_images/' . $course->image) : null,
                         'duration' => $course->duration,
                         'level' => $course->level,
                         'language' => $course->language,
@@ -344,7 +345,7 @@ class PurchasedCourceController extends Controller
                         'id' => $module->id,
                         'name' => $module->name,
                         'description' => $module->description,
-                        'image_url' => $module->image ? asset('storage/' . $module->image) : null,
+                        'image_url' => $module->image ? Storage::disk('r2')->url($student->organization_id . '/course_modules/' . $module->image) : null,
                         'order' => $module->order,
                         'duration' => $module->duration,
                         'duration_type' => $module->duration_type,
@@ -420,7 +421,7 @@ class PurchasedCourceController extends Controller
                         'id' => $module->id,
                         'name' => $module->name,
                         'description' => $module->description,
-                        'image_url' => $module->image ? asset('storage/' . $module->image) : null,
+                        'image_url' => $module->image ? Storage::disk('r2')->url($student->organization_id . '/course_modules/' . $module->image) : null,
                         'order' => $module->order,
                         'duration' => $module->duration,
                         'duration_type' => $module->duration_type,
@@ -578,7 +579,7 @@ class PurchasedCourceController extends Controller
                         'id' => $module->id,
                         'name' => $module->name,
                         'description' => $module->description,
-                        'image_url' => $module->image ? asset('storage/' . $module->image) : null,
+                        'image_url' => $module->image ? Storage::disk('r2')->url($student->organization_id . '/course_modules/' . $module->image) : null,
                         'order' => $module->order,
                         'duration' => $module->duration,
                         'duration_type' => $module->duration_type,

@@ -127,24 +127,20 @@ class OrganizationController extends Controller
     }
 
     /**
-     * Handle file uploads
+     * Handle file uploads to R2
      */
     private function handleFileUploads(Request $request, array $validated, $organizationId, $existing = null)
     {
         $folder = $organizationId . '/settings';
 
-        // Create folder if it doesn't exist
-        if (!Storage::disk('public')->exists($folder)) {
-            Storage::disk('public')->makeDirectory($folder);
-        }
-
         // Handle logo upload
         if ($request->hasFile('logo')) {
             if ($existing && $existing->logo) {
-                Storage::disk('public')->delete($existing->logo);
+                Storage::disk('r2')->delete($existing->logo);
             }
             $logoName = 'logo_' . time() . '.' . $request->file('logo')->getClientOriginalExtension();
-            $logoPath = $request->file('logo')->storeAs($folder, $logoName, 'public');
+            $logoPath = $folder . '/' . $logoName;
+            $request->file('logo')->storeAs($folder, $logoName, 'r2');
             $validated['logo'] = $logoPath;
         } elseif ($existing) {
             $validated['logo'] = $existing->logo;
@@ -153,10 +149,11 @@ class OrganizationController extends Controller
         // Handle favicon upload
         if ($request->hasFile('favicon')) {
             if ($existing && $existing->favicon) {
-                Storage::disk('public')->delete($existing->favicon);
+                Storage::disk('r2')->delete($existing->favicon);
             }
             $faviconName = 'favicon_' . time() . '.' . $request->file('favicon')->getClientOriginalExtension();
-            $faviconPath = $request->file('favicon')->storeAs($folder, $faviconName, 'public');
+            $faviconPath = $folder . '/' . $faviconName;
+            $request->file('favicon')->storeAs($folder, $faviconName, 'r2');
             $validated['favicon'] = $faviconPath;
         } elseif ($existing) {
             $validated['favicon'] = $existing->favicon;
@@ -165,10 +162,11 @@ class OrganizationController extends Controller
         // Handle banner upload
         if ($request->hasFile('banner')) {
             if ($existing && $existing->banner) {
-                Storage::disk('public')->delete($existing->banner);
+                Storage::disk('r2')->delete($existing->banner);
             }
             $bannerName = 'banner_' . time() . '.' . $request->file('banner')->getClientOriginalExtension();
-            $bannerPath = $request->file('banner')->storeAs($folder, $bannerName, 'public');
+            $bannerPath = $folder . '/' . $bannerName;
+            $request->file('banner')->storeAs($folder, $bannerName, 'r2');
             $validated['banner'] = $bannerPath;
         } elseif ($existing) {
             $validated['banner'] = $existing->banner;

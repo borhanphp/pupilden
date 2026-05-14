@@ -132,8 +132,8 @@ class VideoController extends Controller
             if ($request->hasFile('preview_image')) {
                 $previewImage = $request->file('preview_image');
                 $previewImageName = time() . '_' . $previewImage->getClientOriginalName();
-                $previewImagePath = $previewImage->storeAs('video-previews', $previewImageName, 'public');
-                $videoData['preview_image'] = $previewImagePath;
+                $previewImage->storeAs('video-previews', $previewImageName, 'r2');
+                $videoData['preview_image'] = 'video-previews/' . $previewImageName;
             }
 
             // Handle different video types
@@ -378,15 +378,14 @@ class VideoController extends Controller
 
             // Handle preview image upload
             if ($request->hasFile('preview_image')) {
-                // Delete old preview image if exists
-                if ($video->preview_image && Storage::disk('public')->exists($video->preview_image)) {
-                    Storage::disk('public')->delete($video->preview_image);
+                if ($video->preview_image) {
+                    Storage::disk('r2')->delete($video->preview_image);
                 }
 
                 $previewImage = $request->file('preview_image');
                 $previewImageName = time() . '_' . $previewImage->getClientOriginalName();
-                $previewImagePath = $previewImage->storeAs('video-previews', $previewImageName, 'public');
-                $videoData['preview_image'] = $previewImagePath;
+                $previewImage->storeAs('video-previews', $previewImageName, 'r2');
+                $videoData['preview_image'] = 'video-previews/' . $previewImageName;
             }
 
             // Handle different video types
@@ -472,8 +471,8 @@ class VideoController extends Controller
             }
 
             // Delete preview image if exists
-            if ($video->preview_image && Storage::disk('public')->exists($video->preview_image)) {
-                Storage::disk('public')->delete($video->preview_image);
+            if ($video->preview_image) {
+                Storage::disk('r2')->delete($video->preview_image);
             }
 
             $courseId = $video->course_id;

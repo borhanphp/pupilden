@@ -156,13 +156,13 @@ class StudentAuthController extends BaseController
             $input = $request->all();
             if($request->hasFile('profile_picture')){
                 $folder = $student->organization_id.'/profile_pictures';
-                if(!Storage::disk('public')->exists($folder)){
-                    Storage::disk('public')->makeDirectory($folder);
-                    chmod(Storage::disk('public')->path($folder), 0755);
+
+                if ($student->profile_picture) {
+                    Storage::disk('r2')->delete($folder . '/' . $student->profile_picture);
                 }
 
                 $profilen_name = time().'.'.$request->file('profile_picture')->getClientOriginalExtension();
-                $request->file('profile_picture')->storeAs($folder, $profilen_name, 'public');
+                $request->file('profile_picture')->storeAs($folder, $profilen_name, 'r2');
                 $input['profile_picture'] = $profilen_name;
             }
             

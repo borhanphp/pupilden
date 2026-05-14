@@ -77,14 +77,11 @@ class CourseModuleController extends Controller
 
         if ($request->hasFile('image')) {
             $folder = auth()->user()->organization_id . '/course_modules';
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
-            }
             $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $request->file('image')->storeAs($folder, $imageName, 'r2');
             $data['image'] = $imageName;
         }
-        
+
         // Set default order if not provided
         if (!isset($data['order'])) {
             $maxOrder = CourseModule::where('course_id', $data['course_id'])->max('order');
@@ -140,17 +137,13 @@ class CourseModuleController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             $folder = auth()->user()->organization_id . '/course_modules';
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
+
+            if ($courseModule->image) {
+                Storage::disk('r2')->delete($folder . '/' . $courseModule->image);
             }
-            
-            // Delete old image if exists
-            if ($courseModule->image && Storage::disk('public')->exists($folder . '/' . $courseModule->image)) {
-                Storage::disk('public')->delete($folder . '/' . $courseModule->image);
-            }
-            
+
             $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-            $request->file('image')->storeAs($folder, $imageName, 'public');
+            $request->file('image')->storeAs($folder, $imageName, 'r2');
             $data['image'] = $imageName;
         }
 
@@ -166,8 +159,8 @@ class CourseModuleController extends Controller
     public function destroy(CourseModule $courseModule)
     {
         // Delete associated image if exists
-        if ($courseModule->image && Storage::disk('public')->exists(auth()->user()->organization_id . '/course_modules/' . $courseModule->image)) {
-            Storage::disk('public')->delete(auth()->user()->organization_id . '/course_modules/' . $courseModule->image);
+        if ($courseModule->image) {
+            Storage::disk('r2')->delete(auth()->user()->organization_id . '/course_modules/' . $courseModule->image);
         }
 
         $courseModule->delete();

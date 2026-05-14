@@ -136,15 +136,15 @@ class StudentController extends Controller
 
         // Handle profile picture upload
         if ($request->hasFile('profile_picture')) {
-            // Delete old profile picture if exists
-            if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
-                Storage::disk('public')->delete($student->profile_picture);
+            if ($student->profile_picture) {
+                Storage::disk('r2')->delete($student->organization_id . '/profile_pictures/' . $student->profile_picture);
             }
 
             $image = $request->file('profile_picture');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $imagePath = $image->storeAs('students/profile-pictures', $imageName, 'public');
-            $data['profile_picture'] = $imagePath;
+            $folder = $student->organization_id . '/profile_pictures';
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->storeAs($folder, $imageName, 'r2');
+            $data['profile_picture'] = $imageName;
         }
 
         $student->update($data);
@@ -159,8 +159,8 @@ class StudentController extends Controller
     public function destroy(Student $student)
     {
         // Delete profile picture if exists
-        if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
-            Storage::disk('public')->delete($student->profile_picture);
+        if ($student->profile_picture) {
+            Storage::disk('r2')->delete($student->organization_id . '/profile_pictures/' . $student->profile_picture);
         }
 
         $student->delete();

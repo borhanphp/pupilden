@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Models\CoursePurchase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class CoursePurchaseController extends Controller
@@ -138,7 +139,7 @@ class CoursePurchaseController extends Controller
                         'id' => $course->id,
                         'name' => $course->name,
                         'slug' => $course->slug,
-                        'image_url' => $course->image ? asset('storage/' . $course->image) : null,
+                        'image_url' => $course->image ? Storage::disk('r2')->url($course->organization_id . '/course_images/' . $course->image) : null,
                     ],
                     'pricing' => [
                         'original_price' => $originalPrice,
@@ -292,7 +293,7 @@ class CoursePurchaseController extends Controller
                         'id' => $purchase->course->id,
                         'name' => $purchase->course->name,
                         'slug' => $purchase->course->slug,
-                        'image_url' => $purchase->course->image ? asset('storage/' . $purchase->course->image) : null,
+                        'image_url' => $purchase->course->image ? Storage::disk('r2')->url($purchase->course->organization_id . '/course_images/' . $purchase->course->image) : null,
                     ],
                     'coupon' => $purchase->coupon ? [
                         'code' => $purchase->coupon->code,

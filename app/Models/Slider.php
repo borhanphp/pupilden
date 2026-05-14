@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Slider extends Model
 {
@@ -32,12 +33,10 @@ class Slider extends Model
             return null;
         }
 
-        // Legacy: full path under storage (e.g. sliders/{org}/random-name.jpg)
-        if (str_contains($this->image, '/')) {
-            return asset('uploads/'.$this->image);
-        }
+        $path = str_contains($this->image, '/')
+            ? $this->image
+            : $this->organization_id.'/sliders/'.$this->image;
 
-        // Same pattern as Course images: filename only + org folder
-        return asset('uploads/'.$this->organization_id.'/sliders/'.$this->image);
+        return Storage::disk('r2')->url($path);
     }
 }

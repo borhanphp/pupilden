@@ -90,11 +90,8 @@ class CourseController extends Controller
             // Handle image upload
             if ($request->hasFile('image')) {
                 $folder = auth()->user()->organization_id . '/course_images';
-                if (!Storage::disk('public')->exists($folder)) {
-                    Storage::disk('public')->makeDirectory($folder);
-                }
                 $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->storeAs($folder, $imageName, 'public');
+                $request->file('image')->storeAs($folder, $imageName, 'r2');
                 $data['image'] = $imageName;
             }
 
@@ -180,17 +177,13 @@ class CourseController extends Controller
             // Handle image upload
             if ($request->hasFile('image')) {
                 $folder = auth()->user()->organization_id . '/course_images';
-                if (!Storage::disk('public')->exists($folder)) {
-                    Storage::disk('public')->makeDirectory($folder);
+
+                if ($course->image) {
+                    Storage::disk('r2')->delete($folder . '/' . $course->image);
                 }
-                
-                // Delete old image if exists
-                if ($course->image && Storage::disk('public')->exists($folder . '/' . $course->image)) {
-                    Storage::disk('public')->delete($folder . '/' . $course->image);
-                }
-                
+
                 $imageName = time() . '.' . $request->file('image')->getClientOriginalExtension();
-                $request->file('image')->storeAs($folder, $imageName, 'public');
+                $request->file('image')->storeAs($folder, $imageName, 'r2');
                 $data['image'] = $imageName;
             }
 
@@ -219,9 +212,7 @@ class CourseController extends Controller
             // Delete course image if exists
             if ($course->image) {
                 $folder = auth()->user()->organization_id . '/course_images';
-                if (Storage::disk('public')->exists($folder . '/' . $course->image)) {
-                    Storage::disk('public')->delete($folder . '/' . $course->image);
-                }
+                Storage::disk('r2')->delete($folder . '/' . $course->image);
             }
 
             $course->delete();

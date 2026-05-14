@@ -8,6 +8,7 @@ use App\Models\PaymentGateway;
 use App\Models\Organization;
 use App\Models\Domain;
 use App\Models\Slider;
+use Illuminate\Support\Facades\Storage;
 class SiteInformationController extends BaseController
 {
     public $organization_id;
@@ -62,15 +63,15 @@ class SiteInformationController extends BaseController
                 'youtube' => $organization->youtube,
                 'tiktok' => $organization->tiktok,
                 'pinterest' => $organization->pinterest,
-                'logo' => $settings && $settings->getOriginal('logo') ? asset('uploads/' . $settings->getOriginal('logo')) : null,
-                'favicon' => $settings && $settings->getOriginal('favicon') ? asset('uploads/' . $settings->getOriginal('favicon')) : null,
+                'logo' => $settings && $settings->getOriginal('logo') ? Storage::disk('r2')->url($settings->getOriginal('logo')) : null,
+                'favicon' => $settings && $settings->getOriginal('favicon') ? Storage::disk('r2')->url($settings->getOriginal('favicon')) : null,
                 'template' => $settings ? $settings->template : null,
                 'primary_color' => $settings ? $settings->primary_color : null,
                 'footer_color' => $settings ? $settings->footer_color : null,
                 'footer_design' => $settings ? $settings->footer_design : null,
                 'copyright_text' => $settings ? $settings->copyright_text : null,
                 'business_email' => $settings ? $settings->business_email : null,
-                'banner' => $settings && $settings->getOriginal('banner') ? asset('uploads/' . $settings->getOriginal('banner')) : null,
+                'banner' => $settings && $settings->getOriginal('banner') ? Storage::disk('r2')->url($settings->getOriginal('banner')) : null,
                 'hero_text' => $settings ? $settings->hero_text : null,
                 'baksh_number' => $settings ? $settings->baksh_number : null,
                 'ngad_number' => $settings ? $settings->ngad_number : null,

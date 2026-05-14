@@ -76,22 +76,17 @@ class CourseModuleFileController extends Controller
             $file = $request->file('file');
 
             $folder = auth()->user()->organization_id . '/course_module_files';
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
-            }
-            // Generate unique filename
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
             $fileName = time() . '_' . $originalName . '.' . $extension;
-            
-            // Store file
-            $filePath = $file->storeAs($folder, $fileName, 'public');
-            
-            // Get file info
+            $filePath = $folder . '/' . $fileName;
+
+            $file->storeAs($folder, $fileName, 'r2');
+
             $data['file_path'] = $filePath;
             $data['file_type'] = $this->getFileType($extension);
             $data['file_size'] = $file->getSize();
-            $data['file_url'] = asset('uploads/' . auth()->user()->organization_id . '/course_module_files/' . $fileName);
+            $data['file_url'] = Storage::disk('r2')->url($filePath);
             $data['file_extension'] = $extension;
             $data['file_mime_type'] = $file->getMimeType();
         }
@@ -141,29 +136,23 @@ class CourseModuleFileController extends Controller
         // Handle file upload if new file is provided
         if ($request->hasFile('file')) {
             $folder = auth()->user()->organization_id . '/course_module_files';
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
-            }
-            // Delete old file if exists
-            if ($courseModuleFile->file_path && Storage::disk('public')->exists($folder . '/' . $courseModuleFile->file_path)) {
-                Storage::disk('public')->delete($folder . '/' . $courseModuleFile->file_path);
+
+            if ($courseModuleFile->file_path) {
+                Storage::disk('r2')->delete($courseModuleFile->file_path);
             }
 
             $file = $request->file('file');
-            
-            // Generate unique filename
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
             $fileName = time() . '_' . $originalName . '.' . $extension;
-            
-            // Store file
-            $filePath = $file->storeAs($folder, $fileName, 'public');
-            
-            // Get file info
+            $filePath = $folder . '/' . $fileName;
+
+            $file->storeAs($folder, $fileName, 'r2');
+
             $data['file_path'] = $filePath;
             $data['file_type'] = $this->getFileType($extension);
             $data['file_size'] = $file->getSize();
-            $data['file_url'] = asset('uploads/' . auth()->user()->organization_id . '/course_module_files/' . $fileName);
+            $data['file_url'] = Storage::disk('r2')->url($filePath);
             $data['file_extension'] = $extension;
             $data['file_mime_type'] = $file->getMimeType();
         }
@@ -180,8 +169,8 @@ class CourseModuleFileController extends Controller
     public function destroy(CourseModuleFile $courseModuleFile)
     {
         // Delete associated file if exists
-        if ($courseModuleFile->file_path && Storage::disk('public')->exists(auth()->user()->organization_id . '/course_module_files/' . $courseModuleFile->file_path)) {
-            Storage::disk('public')->delete(auth()->user()->organization_id . '/course_module_files/' . $courseModuleFile->file_path);
+        if ($courseModuleFile->file_path) {
+            Storage::disk('r2')->delete($courseModuleFile->file_path);
         }
 
         $courseModuleFile->delete();
@@ -191,15 +180,15 @@ class CourseModuleFileController extends Controller
     }
 
     /**
-     * Download the file
+     * Download the file (redirect to R2 public URL)
      */
     public function download(CourseModuleFile $courseModuleFile)
     {
-        if (!$courseModuleFile->file_path || !Storage::disk('public')->exists(auth()->user()->organization_id . '/course_module_files/' . $courseModuleFile->file_path)) {
+        if (!$courseModuleFile->file_path) {
             return redirect()->back()->with('error', 'File not found.');
         }
 
-        return response()->download(storage_path('app/public/' . $courseModuleFile->file_path), $courseModuleFile->name . '.' . $courseModuleFile->file_extension);
+        return redirect(Storage::disk('r2')->url($courseModuleFile->file_path));
     }
 
     /**

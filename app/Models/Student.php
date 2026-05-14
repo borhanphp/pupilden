@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 
 class Student extends Authenticatable implements CanResetPassword
 {
@@ -34,6 +35,17 @@ class Student extends Authenticatable implements CanResetPassword
     ];
 
     protected $hidden = ['password'];
+
+    protected $appends = ['profile_picture_url'];
+
+    public function getProfilePictureUrlAttribute(): ?string
+    {
+        if (! $this->profile_picture) {
+            return null;
+        }
+
+        return Storage::disk('r2')->url($this->organization_id . '/profile_pictures/' . $this->profile_picture);
+    }
 
     /**
      * Get the organization that owns the student

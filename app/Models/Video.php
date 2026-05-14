@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Video extends Model
 {
@@ -105,7 +106,7 @@ class Video extends Model
     {
         // Return custom preview image if available
         if ($this->attributes['preview_image'] ?? null) {
-            return asset('storage/' . $this->attributes['preview_image']);
+            return Storage::disk('r2')->url($this->attributes['preview_image']);
         }
         
         if ($this->attributes['video_type'] === 1 && ($this->attributes['video_url'] ?? null)) {
