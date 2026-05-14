@@ -49,7 +49,6 @@
                                     <label for="course_id" class="form-label">Course</label>
                                     <select name="course_id" 
                                             id="course_id" 
-                                            onchange="getCourseModules(this.value)"
                                             class="form-select @error('course_id') is-invalid @enderror"
                                             {{ isset($courseId) ? 'readonly' : '' }}>
                                         <option value="">Select a course</option>
@@ -312,10 +311,15 @@
             toggleVideoInputs();
             
             // Load course modules whenever a course is already selected (create or edit)
-            const courseId = document.getElementById('course_id').value;
-            if (courseId) {
-                getCourseModules(courseId, isEditMode ? selectedModuleId : null);
+            const courseSelect = document.getElementById('course_id');
+            if (courseSelect.value) {
+                getCourseModules(courseSelect.value, isEditMode ? selectedModuleId : null);
             }
+
+            // Load modules whenever user changes the selected course
+            courseSelect.addEventListener('change', function() {
+                getCourseModules(this.value, null);
+            });
             
             // Handle form submission with upload progress
             const form = document.getElementById('videoForm');
@@ -680,19 +684,39 @@
             }
         }
         function getCourseModules(courseId, selectedModuleId = null) {
-            $.ajax({
-                url: "{{ route('course-modules.index') }}",
-                type: "GET",
-                data: { course_id: courseId },
-                success: function(response) {
-                    console.log(response);
-                    $('#course_module_id').html('');
-                    $('#course_module_id').append('<option value="">Select a course module</option>');
-                    response.forEach(function(module) {
-                        const selected = selectedModuleId && module.id == selectedModuleId ? ' selected' : '';
-                        $('#course_module_id').append('<option value="' + module.id + '"' + selected + '>' + module.name + '</option>');
-                    });
+            if (!courseId) return;
+
+            const select = document.getElementById('course_module_id');
+            select.innerHTML = '<option value="">Loading...</option>';
+
+            fetch(`{{ route('course-modules.index') }}?course_id=${encodeURIComponent(courseId)}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
                 }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Server returned ' + res.status);
+                return res.json();
+            })
+            .then(function(modules) {
+                select.innerHTML = '<option value="">Select a course module</option>';
+                if (modules.length === 0) {
+                    select.innerHTML = '<option value="">No modules found for this course</option>';
+                    return;
+                }
+                modules.forEach(function(module) {
+                    const opt = document.createElement('option');
+                    opt.value = module.id;
+                    opt.textContent = module.name;
+                    if (selectedModuleId && module.id == selectedModuleId) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            })
+            .catch(function(err) {
+                select.innerHTML = '<option value="">Failed to load modules</option>';
+                console.error('getCourseModules error:', err);
             });
         }
     </script>
