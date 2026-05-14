@@ -311,12 +311,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             toggleVideoInputs();
             
-            // Load course modules if editing and course is selected
-            if (isEditMode) {
-                const courseId = document.getElementById('course_id').value;
-                if (courseId) {
-                    getCourseModules(courseId, selectedModuleId);
-                }
+            // Load course modules whenever a course is already selected (create or edit)
+            const courseId = document.getElementById('course_id').value;
+            if (courseId) {
+                getCourseModules(courseId, isEditMode ? selectedModuleId : null);
             }
             
             // Handle form submission with upload progress

@@ -527,19 +527,8 @@ class VideoController extends Controller
                 $payload['maxDurationSeconds'] = 14400; // 4 hours for very large files
             }
 
-            // Set allowedOrigins to include all domains where videos should play
-            $allowedOrigins = ['localhost', 'rendersden.com'];
-            $appUrl = env('APP_URL');
-            if ($appUrl) {
-                $parsed = parse_url($appUrl);
-                if (isset($parsed['host'])) {
-                    $domain = preg_replace('/^www\./', '', $parsed['host']);
-                    if (!in_array($domain, $allowedOrigins)) {
-                        $allowedOrigins[] = $domain;
-                    }
-                }
-            }
-            $payload['allowedOrigins'] = $allowedOrigins;
+            // Do NOT set allowedOrigins — leave empty so videos play on any domain.
+            // Access control is handled by signed URL tokens, not domain restrictions.
 
             // Create direct creator upload URL
             $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
@@ -556,26 +545,6 @@ class VideoController extends Controller
                 'response' => $data,
                 'payload' => $payload
             ]);
-
-            // If request failed and we included allowedOrigins, try without it
-            if (!$response->successful() && isset($payload['allowedOrigins'])) {
-                Log::info('Retrying without allowedOrigins');
-                unset($payload['allowedOrigins']);
-
-                $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
-                    ->withHeaders([
-                        'Content-Type' => 'application/json'
-                    ])
-                    ->post("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/direct_upload", $payload);
-
-                $data = $response->json();
-
-                Log::info('Cloudflare Direct Upload Retry Response', [
-                    'status' => $response->status(),
-                    'response' => $data,
-                    'payload' => $payload
-                ]);
-            }
 
             if ($response->successful() && isset($data['result'])) {
                 $result = $data['result'];

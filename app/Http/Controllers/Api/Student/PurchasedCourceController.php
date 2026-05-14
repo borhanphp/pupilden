@@ -17,6 +17,7 @@ use App\Models\Video;
 use App\Models\Exam;
 use App\Models\Question;
 use Illuminate\Support\Facades\Validator;
+use App\Services\CloudflareStreamService;
 
 class PurchasedCourceController extends Controller
 {
@@ -433,7 +434,7 @@ class PurchasedCourceController extends Controller
                             'id' => $video->id,
                             'title' => $video->title,
                             'description' => $video->description,
-                            'video_url' => $video->video_url,
+                            'video_url' => $this->resolveVideoUrl($video),
                             'thumbnail_url' => $video->thumbnail_url,
                             'duration' => $video->duration,
                             'duration_formatted' => $this->formatDuration($video->duration),
@@ -473,7 +474,7 @@ class PurchasedCourceController extends Controller
                     'id' => $video->id,
                     'title' => $video->title,
                     'description' => $video->description,
-                    'video_url' => $video->video_url,
+                    'video_url' => $this->resolveVideoUrl($video),
                     'thumbnail_url' => $video->thumbnail_url,
                     'duration' => $video->duration,
                     'duration_formatted' => $this->formatDuration($video->duration),
@@ -591,7 +592,7 @@ class PurchasedCourceController extends Controller
                             'id' => $video->id,
                             'title' => $video->title,
                             'description' => $video->description,
-                            'video_url' => $video->video_url,
+                            'video_url' => $this->resolveVideoUrl($video),
                             'thumbnail_url' => $video->thumbnail_url,
                             'duration' => $video->duration,
                             'duration_formatted' => $this->formatDuration($video->duration),
@@ -631,6 +632,38 @@ class PurchasedCourceController extends Controller
                 'message' => 'Error retrieving module videos: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Build the video_url to return to the frontend.
+     * For Cloudflare Stream videos: return a signed embed URL (iframe.videodelivery.net/{token}).
+     * For other types: return the raw URL as-is.
+     */
+    private function resolveVideoUrl(Video $video): ?string
+    {
+        // Cloudflare Stream videos (video_type === 2)
+        if ((int) $video->video_type === 2) {
+            // Prefer the explicit cloudflare_video_id column, fall back to extracting from URL
+            $videoId = $video->cloudflare_video_id
+                ?? CloudflareStreamService::extractVideoId((string) $video->video_url);
+
+            if ($videoId) {
+                $service = app(CloudflareStreamService::class);
+                if ($service->isConfigured()) {
+                    try {
+                        return $service->signedEmbedUrl($videoId);
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::warning('Cloudflare signed token failed', [
+                            'video_id' => $videoId,
+                            'error'    => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+        }
+
+        // Non-Cloudflare or fallback: return raw URL
+        return $video->video_url;
     }
 
     /**
