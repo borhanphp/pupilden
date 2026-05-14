@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\GmailService;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force HTTPS in production so all route() and asset() calls produce https:// URLs.
+        // This prevents Mixed Content errors when running behind a reverse proxy (nginx/Cloudflare).
+        if ($this->app->environment('production') || str_starts_with(config('app.url'), 'https')) {
+            URL::forceScheme('https');
+        }
     }
 }
