@@ -120,6 +120,7 @@ class PublicCourseController extends BaseController
                         'slug' => $course->courseSubCategory->slug
                     ] : null,
                     'tags' => $course->tags,
+                    'course_includes' => $course->course_includes ?? [],
                     'is_featured' => $course->is_featured,
                     'enrolled_students_count' => $course->students->count(),
                     'created_at' => $course->created_at->format('Y-m-d H:i:s'),
@@ -190,6 +191,7 @@ class PublicCourseController extends BaseController
                         'slug' => $course->courseSubCategory->slug
                     ] : null,
                     'tags' => $course->tags,
+                    'course_includes' => $course->course_includes ?? [],
                     'enrolled_students_count' => $course->students->count(),
                     'created_at' => $course->created_at->format('Y-m-d H:i:s')
                 ];
@@ -247,6 +249,7 @@ class PublicCourseController extends BaseController
                 ] : null,
                 'tags' => $course->tags,
                 'keywords' => $course->keywords,
+                'course_includes' => $course->course_includes ?? [],
                 'is_featured' => $course->is_featured,
                 'enrolled_students_count' => $course->students->count(),
                 'creator' => $course->creator ? [
@@ -384,6 +387,7 @@ class PublicCourseController extends BaseController
                         'slug' => $course->courseSubCategory->slug
                     ] : null,
                     'tags' => $course->tags,
+                    'course_includes' => $course->course_includes ?? [],
                     'is_featured' => $course->is_featured,
                     'enrolled_students_count' => $course->students->count(),
                     'created_at' => $course->created_at->format('Y-m-d H:i:s')
@@ -471,6 +475,7 @@ class PublicCourseController extends BaseController
                         'slug' => $course->courseSubCategory->slug
                     ] : null,
                     'tags' => $course->tags,
+                    'course_includes' => $course->course_includes ?? [],
                     'is_featured' => $course->is_featured,
                     'enrolled_students_count' => $course->students->count(),
                     'created_at' => $course->created_at->format('Y-m-d H:i:s')

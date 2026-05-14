@@ -62,10 +62,18 @@ class CourseController extends Controller
             'is_published' => 'boolean',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
-            'is_archived' => 'boolean'
+            'is_archived' => 'boolean',
+            'course_includes' => 'nullable|array',
+            'course_includes.*' => 'nullable|string|max:255',
         ]);
 
         try {
+            $includes = collect($request->input('course_includes', []))
+                ->map(fn($v) => trim($v))
+                ->filter()
+                ->values()
+                ->all();
+
             $data = [
                 'organization_id' => auth()->user()->organization_id,
                 'name' => $request->name,
@@ -78,6 +86,7 @@ class CourseController extends Controller
                 'course_sub_category_id' => $request->course_sub_category_id,
                 'tags' => $request->tags,
                 'keywords' => $request->keywords,
+                'course_includes' => $includes ?: null,
                 'price' => $request->price ?? 0,
                 'is_published' => $request->has('is_published'),
                 'is_active' => $request->has('is_active'),
@@ -151,10 +160,18 @@ class CourseController extends Controller
             'is_published' => 'boolean',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
-            'is_archived' => 'boolean'
+            'is_archived' => 'boolean',
+            'course_includes' => 'nullable|array',
+            'course_includes.*' => 'nullable|string|max:255',
         ]);
 
         try {
+            $includes = collect($request->input('course_includes', []))
+                ->map(fn($v) => trim($v))
+                ->filter()
+                ->values()
+                ->all();
+
             $data = [
                 'name' => $request->name,
                 'slug' => Str::slug($request->name),
@@ -166,6 +183,7 @@ class CourseController extends Controller
                 'course_sub_category_id' => $request->course_sub_category_id,
                 'tags' => $request->tags,
                 'keywords' => $request->keywords,
+                'course_includes' => $includes ?: null,
                 'price' => $request->price ?? 0,
                 'is_published' => $request->has('is_published'),
                 'is_active' => $request->has('is_active'),

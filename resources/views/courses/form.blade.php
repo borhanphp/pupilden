@@ -280,6 +280,60 @@
                             </div>
                         </div>
 
+                        {{-- Course Includes (bullet points) --}}
+                        <div class="row mt-3 mb-3">
+                            <div class="col-md-12">
+                                <div class="card border">
+                                    <div class="card-header d-flex align-items-center justify-content-between py-2">
+                                        <h6 class="mb-0 fw-semibold">
+                                            <i class="fas fa-list-check me-1"></i> Course Includes
+                                            <small class="text-muted fw-normal ms-1">— shown as bullet points on course details page</small>
+                                        </h6>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="add-include-btn">
+                                            <i class="fas fa-plus"></i> Add Item
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="course-includes-list">
+                                            @php
+                                                $existingIncludes = old('course_includes', isset($course) ? ($course->course_includes ?? []) : []);
+                                            @endphp
+                                            @if(!empty($existingIncludes))
+                                                @foreach($existingIncludes as $item)
+                                                    <div class="course-include-item d-flex align-items-center gap-2 mb-2">
+                                                        <span class="text-muted"><i class="fas fa-grip-vertical"></i></span>
+                                                        <input type="text"
+                                                               name="course_includes[]"
+                                                               value="{{ $item }}"
+                                                               class="form-control form-control-sm"
+                                                               placeholder="e.g. Full lifetime access">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-include-btn">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="course-include-item d-flex align-items-center gap-2 mb-2">
+                                                    <span class="text-muted"><i class="fas fa-grip-vertical"></i></span>
+                                                    <input type="text"
+                                                           name="course_includes[]"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="e.g. Full lifetime access">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger remove-include-btn">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="text-muted small mt-1">
+                                            <i class="fas fa-info-circle"></i>
+                                            Add what students get with this course, e.g. "30 hours on-demand video", "Certificate of completion", "Access on mobile and desktop"
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ route('courses.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
@@ -293,4 +347,37 @@
             </div>
         </div>
     </div>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const list = document.getElementById('course-includes-list');
+        const addBtn = document.getElementById('add-include-btn');
+
+        function newItemHtml() {
+            return `<div class="course-include-item d-flex align-items-center gap-2 mb-2">
+                        <span class="text-muted"><i class="fas fa-grip-vertical"></i></span>
+                        <input type="text" name="course_includes[]" class="form-control form-control-sm" placeholder="e.g. Full lifetime access">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-include-btn"><i class="fas fa-times"></i></button>
+                    </div>`;
+        }
+
+        addBtn.addEventListener('click', function () {
+            list.insertAdjacentHTML('beforeend', newItemHtml());
+        });
+
+        list.addEventListener('click', function (e) {
+            const btn = e.target.closest('.remove-include-btn');
+            if (btn) {
+                const items = list.querySelectorAll('.course-include-item');
+                if (items.length > 1) {
+                    btn.closest('.course-include-item').remove();
+                } else {
+                    // Keep at least one row, just clear the value
+                    btn.closest('.course-include-item').querySelector('input').value = '';
+                }
+            }
+        });
+    });
+</script>
+@endpush
 @endsection

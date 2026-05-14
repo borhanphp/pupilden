@@ -21,6 +21,7 @@ class Course extends Model
         'course_sub_category_id',
         'tags',
         'keywords',
+        'course_includes',
         'image',
         'price',
         'is_published',
@@ -33,6 +34,7 @@ class Course extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'course_includes' => 'array',
         'is_published' => 'boolean',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
