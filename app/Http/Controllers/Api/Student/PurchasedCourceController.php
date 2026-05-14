@@ -340,7 +340,7 @@ class PurchasedCourceController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $modules->map(function($module) {
+                'data' => $modules->map(function($module) use ($student) {
                     return [
                         'id' => $module->id,
                         'name' => $module->name,
@@ -415,7 +415,7 @@ class PurchasedCourceController extends Controller
                 ->get();
 
             // Transform modules data
-            $modulesData = $modules->map(function($module) {
+            $modulesData = $modules->map(function($module) use ($student) {
                 return [
                     'module' => [
                         'id' => $module->id,
