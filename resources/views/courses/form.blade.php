@@ -143,17 +143,10 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea name="description" 
-                                              id="description" 
-                                              class="form-control @error('description') is-invalid @enderror"
-                                              rows="4"
-                                              placeholder="Enter course description">{{ old('description', $course->description ?? '') }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                                @include('partials.summernote-field', [
+                                    'value' => old('description', $course->description ?? ''),
+                                    'placeholder' => 'Enter course description',
+                                ])
 
                                 <div class="row">
                                     <div class="col-md-6">

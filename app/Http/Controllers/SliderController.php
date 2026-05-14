@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Slider;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,6 +52,7 @@ class SliderController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'link' => 'nullable|string|max:600',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -64,6 +66,7 @@ class SliderController extends Controller
             'organization_id' => auth()->user()->organization_id,
             'title' => $request->title,
             'description' => $request->description,
+            'link' => ($link = trim((string) $request->input('link', ''))) !== '' ? $link : null,
             'image' => $imageName,
             'sort_order' => $request->input('sort_order', 0),
             'is_active' => $request->has('is_active'),
@@ -87,6 +90,7 @@ class SliderController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'link' => 'nullable|string|max:600',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -95,6 +99,7 @@ class SliderController extends Controller
         $data = [
             'title' => $request->title,
             'description' => $request->description,
+            'link' => ($link = trim((string) $request->input('link', ''))) !== '' ? $link : null,
             'sort_order' => $request->input('sort_order', $slider->sort_order),
             'is_active' => $request->has('is_active'),
         ];
@@ -125,5 +130,29 @@ class SliderController extends Controller
 
         return redirect()->route('sliders.index')
             ->with('success', 'Slider deleted successfully.');
+    }
+
+    /**
+     * AJAX upload for embedded images in the slider description (Summernote).
+     */
+    public function uploadDescriptionImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
+
+        $orgId = (string) auth()->user()->organization_id;
+        $folder = $orgId.'/sliders/description';
+        if (! Storage::disk('public')->exists($folder)) {
+            Storage::disk('public')->makeDirectory($folder);
+        }
+
+        $extension = $request->file('file')->getClientOriginalExtension() ?: 'jpg';
+        $filename = uniqid('desc_', true).'.'.$extension;
+        $request->file('file')->storeAs($folder, $filename, 'public');
+
+        $url = asset('uploads/'.$folder.'/'.$filename);
+
+        return response()->json(['url' => $url]);
     }
 }

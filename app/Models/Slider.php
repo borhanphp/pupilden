@@ -12,6 +12,7 @@ class Slider extends Model
         'organization_id',
         'title',
         'description',
+        'link',
         'image',
         'sort_order',
         'is_active',

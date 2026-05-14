@@ -128,6 +128,7 @@ class SiteInformationController extends BaseController
                         'id' => $slider->id,
                         'title' => $slider->title,
                         'description' => $slider->description,
+                        'link' => $slider->link,
                         'image_url' => $slider->image_url,
                         'sort_order' => $slider->sort_order,
                         'is_active' => $slider->is_active,

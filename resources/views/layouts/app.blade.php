@@ -39,6 +39,7 @@
     <link rel="stylesheet" href="{{asset('assets/css/kaiadmin.min.css')}}" />
 
     @stack('styles')
+    <link rel="stylesheet" href="{{asset('assets/css/app-overrides.css')}}" />
   </head>
   <body>
     <div class="wrapper">
