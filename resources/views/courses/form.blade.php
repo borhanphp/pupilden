@@ -197,7 +197,7 @@
                                     </div>
                                     @if(isset($course) && $course->image)
                                         <div class="mt-2">
-                                            <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_images/' . $course->image) }}" 
+                                            <img src="{{ \Storage::disk('r2')->url(auth()->user()->organization_id . '/course_images/' . $course->image) }}" 
                                                  alt="{{ $course->name }}" 
                                                  class="img-thumbnail" 
                                                  style="max-width: 200px;">

@@ -123,7 +123,7 @@
                                 </div>
                                 <div class="card-body text-center">
                                     @if($course->image)
-                                        <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_images/' . $course->image) }}" 
+                                        <img src="{{ \Storage::disk('r2')->url(auth()->user()->organization_id . '/course_images/' . $course->image) }}" 
                                              alt="{{ $course->name }}" 
                                              class="img-fluid rounded" 
                                              style="max-width: 100%; height: auto;">

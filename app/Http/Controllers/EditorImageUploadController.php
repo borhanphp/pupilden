@@ -19,15 +19,12 @@ class EditorImageUploadController extends Controller
 
         $orgId = (string) auth()->user()->organization_id;
         $folder = $orgId.'/editor/content';
-        if (! Storage::disk('public')->exists($folder)) {
-            Storage::disk('public')->makeDirectory($folder);
-        }
 
         $extension = $request->file('file')->getClientOriginalExtension() ?: 'jpg';
         $filename = uniqid('editor_', true).'.'.$extension;
-        $request->file('file')->storeAs($folder, $filename, 'public');
+        $request->file('file')->storeAs($folder, $filename, 'r2');
 
-        $url = asset('uploads/'.$folder.'/'.$filename);
+        $url = Storage::disk('r2')->url($folder.'/'.$filename);
 
         return response()->json(['url' => $url]);
     }

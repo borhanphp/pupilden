@@ -34,7 +34,7 @@
                                     <th width="40%">Logo</th>
                                     <td>
                                         @if($organizationSetting->logo)
-                                            <img src="{{ asset('uploads/' . $organizationSetting->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 150px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 150px;">
                                         @else
                                             <span class="text-muted">No logo</span>
                                         @endif
@@ -44,7 +44,7 @@
                                     <th>Favicon</th>
                                     <td>
                                         @if($organizationSetting->favicon)
-                                            <img src="{{ asset('uploads/' . $organizationSetting->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 50px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 50px;">
                                         @else
                                             <span class="text-muted">No favicon</span>
                                         @endif
@@ -91,7 +91,7 @@
                                     <th width="40%">Banner</th>
                                     <td>
                                         @if($organizationSetting->banner)
-                                            <img src="{{ asset('uploads/' . $organizationSetting->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 150px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 150px;">
                                         @else
                                             <span class="text-muted">No banner</span>
                                         @endif

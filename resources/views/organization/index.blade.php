@@ -363,7 +363,7 @@
                                             <label for="logo" class="form-label">Logo</label>
                                             @if(isset($settings) && $settings->logo)
                                                 <div class="mb-2">
-                                                    <img src="{{ asset('uploads/' . $settings->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 200px;">
+                                                    <img src="{{ \Storage::disk('r2')->url($settings->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 200px;">
                                                 </div>
                                             @endif
                                             <input type="file" 
@@ -383,7 +383,7 @@
                                             <label for="favicon" class="form-label">Favicon</label>
                                             @if(isset($settings) && $settings->favicon)
                                                 <div class="mb-2">
-                                                    <img src="{{ asset('uploads/' . $settings->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 100px;">
+                                                    <img src="{{ \Storage::disk('r2')->url($settings->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 100px;">
                                                 </div>
                                             @endif
                                             <input type="file" 
@@ -480,7 +480,7 @@
                                             <label for="banner" class="form-label">Banner</label>
                                             @if(isset($settings) && $settings->banner)
                                                 <div class="mb-2">
-                                                    <img src="{{ asset('uploads/' . $settings->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 200px;">
+                                                    <img src="{{ \Storage::disk('r2')->url($settings->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 200px;">
                                                 </div>
                                             @endif
                                             <input type="file" 

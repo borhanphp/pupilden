@@ -29,7 +29,7 @@
                                     <label for="logo" class="form-label">Logo</label>
                                     @if($organizationSetting->logo)
                                         <div class="mb-2">
-                                            <img src="{{ asset('uploads/' . $organizationSetting->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 200px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->logo) }}" alt="Logo" class="img-thumbnail" style="max-width: 200px;">
                                         </div>
                                     @endif
                                     <input type="file" 
@@ -48,7 +48,7 @@
                                     <label for="favicon" class="form-label">Favicon</label>
                                     @if($organizationSetting->favicon)
                                         <div class="mb-2">
-                                            <img src="{{ asset('uploads/' . $organizationSetting->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 100px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->favicon) }}" alt="Favicon" class="img-thumbnail" style="max-width: 100px;">
                                         </div>
                                     @endif
                                     <input type="file" 
@@ -121,7 +121,7 @@
                                     <label for="banner" class="form-label">Banner</label>
                                     @if($organizationSetting->banner)
                                         <div class="mb-2">
-                                            <img src="{{ asset('uploads/' . $organizationSetting->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 200px;">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->banner) }}" alt="Banner" class="img-thumbnail" style="max-width: 200px;">
                                         </div>
                                     @endif
                                     <input type="file" 

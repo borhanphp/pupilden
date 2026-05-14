@@ -152,7 +152,7 @@
                                 </div>
                                 <div class="card-body text-center">
                                     @if($courseModule->image)
-                                        <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_modules/' . $courseModule->image) }}" 
+                                        <img src="{{ \Storage::disk('r2')->url(auth()->user()->organization_id . '/course_modules/' . $courseModule->image) }}" 
                                              alt="{{ $courseModule->name }}" 
                                              class="img-thumbnail" 
                                              style="width: 100px; height: 100px; object-fit: cover;">

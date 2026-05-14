@@ -82,7 +82,7 @@
                                     <label for="image" class="form-label">Module Image</label>
                                     @if($courseModule->image)
                                         <div class="mb-2">
-                                            <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_modules/' . $courseModule->image) }}" 
+                                            <img src="{{ \Storage::disk('r2')->url(auth()->user()->organization_id . '/course_modules/' . $courseModule->image) }}" 
                                                  alt="{{ $courseModule->name }}" 
                                                  class="img-thumbnail" 
                                                  style="width: 100px; height: 100px; object-fit: cover;">

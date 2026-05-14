@@ -82,7 +82,7 @@
                                         </td>
                                         <td>
                                             @if($module->image)
-                                                <img src="{{ asset('uploads/' . auth()->user()->organization_id . '/course_modules/' . $module->image) }}" 
+                                                <img src="{{ \Storage::disk('r2')->url(auth()->user()->organization_id . '/course_modules/' . $module->image) }}" 
                                                      alt="{{ $module->name }}" 
                                                      class="img-thumbnail" 
                                                      style="width: 50px; height: 50px; object-fit: cover;">
