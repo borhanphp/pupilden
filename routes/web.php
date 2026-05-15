@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('course-module-files', CourseModuleFileController::class);
     Route::get('course-module-files/{courseModuleFile}/download', [CourseModuleFileController::class, 'download'])->name('course-module-files.download');
     Route::resource('students', StudentController::class);
+    Route::get('students-export', [StudentController::class, 'export'])->name('students.export');
     Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
     Route::post('students/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('students.toggle-status');
     Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');

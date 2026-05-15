@@ -264,6 +264,104 @@
                             </div>
                         </div>
 
+                        {{-- SEO / Meta Tags --}}
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5 class="mb-1">SEO & Meta Tags</h5>
+                                <p class="text-muted small mb-3">These tags are used by search engines and social media previews.</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="meta_title" class="form-label">
+                                        <i class="fas fa-heading text-secondary me-1"></i> Title Tag
+                                        <span class="text-muted small">(max 60 chars recommended)</span>
+                                    </label>
+                                    <input type="text" name="meta_title" id="meta_title"
+                                           value="{{ old('meta_title', $organizationSetting->meta_title) }}"
+                                           class="form-control @error('meta_title') is-invalid @enderror"
+                                           placeholder="My Academy — Learn, Grow, Succeed"
+                                           maxlength="255"
+                                           oninput="updateCharCount(this, 'meta_title_count', 60)">
+                                    <div class="d-flex justify-content-between">
+                                        @error('meta_title')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        <small class="text-muted ms-auto"><span id="meta_title_count">{{ strlen(old('meta_title', $organizationSetting->meta_title ?? '')) }}</span>/60</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="og_image" class="form-label">
+                                        <i class="fas fa-image text-secondary me-1"></i> OG / Social Share Image
+                                        <span class="text-muted small">(1200×630 recommended)</span>
+                                    </label>
+                                    @if($organizationSetting->og_image)
+                                        <div class="mb-2">
+                                            <img src="{{ \Storage::disk('r2')->url($organizationSetting->og_image) }}" alt="OG Image" class="img-thumbnail" style="max-width:200px;">
+                                        </div>
+                                    @endif
+                                    <input type="file" name="og_image" id="og_image"
+                                           class="form-control @error('og_image') is-invalid @enderror"
+                                           accept="image/*"
+                                           onchange="previewImage(this, 'og-image-preview')">
+                                    @error('og_image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    <div id="og-image-preview" class="mt-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="meta_description" class="form-label">
+                                        <i class="fas fa-align-left text-secondary me-1"></i> Meta Description
+                                        <span class="text-muted small">(max 160 chars recommended)</span>
+                                    </label>
+                                    <textarea name="meta_description" id="meta_description" rows="3"
+                                              class="form-control @error('meta_description') is-invalid @enderror"
+                                              placeholder="Access high-quality courses, earn certificates, and track your learning progress."
+                                              maxlength="500"
+                                              oninput="updateCharCount(this, 'meta_desc_count', 160)">{{ old('meta_description', $organizationSetting->meta_description) }}</textarea>
+                                    <div class="d-flex justify-content-between">
+                                        @error('meta_description')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                        <small class="text-muted ms-auto"><span id="meta_desc_count">{{ strlen(old('meta_description', $organizationSetting->meta_description ?? '')) }}</span>/160</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="meta_keywords" class="form-label">
+                                        <i class="fas fa-tags text-secondary me-1"></i> Meta Keywords
+                                        <span class="text-muted small">(comma-separated)</span>
+                                    </label>
+                                    <input type="text" name="meta_keywords" id="meta_keywords"
+                                           value="{{ old('meta_keywords', $organizationSetting->meta_keywords) }}"
+                                           class="form-control @error('meta_keywords') is-invalid @enderror"
+                                           placeholder="LMS, online learning, courses, education">
+                                    @error('meta_keywords')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Currency --}}
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">Currency</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="currency_symbol" class="form-label">Currency Symbol</label>
+                                    <input type="text" name="currency_symbol" id="currency_symbol"
+                                           value="{{ old('currency_symbol', $organizationSetting->currency_symbol ?? 'Tk') }}"
+                                           class="form-control @error('currency_symbol') is-invalid @enderror"
+                                           placeholder="Tk"
+                                           maxlength="10">
+                                    <small class="text-muted">e.g. Tk, ৳, $, £, €</small>
+                                    @error('currency_symbol')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Site Identity & Contact --}}
                         <div class="row mt-4">
                             <div class="col-md-12">
@@ -405,6 +503,15 @@
                     preview.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">';
                 };
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateCharCount(el, counterId, limit) {
+            const len = el.value.length;
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                counter.textContent = len;
+                counter.style.color = len > limit ? '#dc3545' : '';
             }
         }
     </script>

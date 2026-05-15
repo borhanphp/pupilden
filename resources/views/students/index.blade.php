@@ -11,9 +11,10 @@
                         <h4 class="card-title mb-0">
                             <i class="fas fa-user-graduate"></i> Students
                         </h4>
-                        {{-- <a href="{{ route('students.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add New Student
-                        </a> --}}
+                        <a href="{{ route('students.export', request()->only('search', 'organization_id')) }}"
+                           class="btn btn-success">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </a>
                     </div>
                 </div>
                 <div class="card-body">

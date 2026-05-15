@@ -34,6 +34,11 @@ class OrganizationSetting extends Model
         'youtube_url',
         'tiktok_url',
         'pinterest_url',
+        'currency_symbol',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'og_image',
     ];
 
     public function organization()

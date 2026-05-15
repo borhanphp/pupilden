@@ -80,6 +80,11 @@ class OrganizationSettingController extends Controller
             'youtube_url' => 'nullable|url|max:500',
             'tiktok_url' => 'nullable|url|max:500',
             'pinterest_url' => 'nullable|url|max:500',
+            'currency_symbol' => 'nullable|string|max:10',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:1000',
+            'og_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $validated['organization_id'] = $organizationId;
@@ -161,6 +166,11 @@ class OrganizationSettingController extends Controller
             'youtube_url' => 'nullable|url|max:500',
             'tiktok_url' => 'nullable|url|max:500',
             'pinterest_url' => 'nullable|url|max:500',
+            'currency_symbol' => 'nullable|string|max:10',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:1000',
+            'og_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         // Handle file uploads
@@ -251,6 +261,19 @@ class OrganizationSettingController extends Controller
             $validated['banner'] = $existing->banner;
         }
 
+        // Handle OG image upload
+        if ($request->hasFile('og_image')) {
+            if ($existing && $existing->og_image) {
+                Storage::disk('r2')->delete($existing->og_image);
+            }
+            $ogName = 'og_' . time() . '.' . $request->file('og_image')->getClientOriginalExtension();
+            $ogPath = $folder . '/' . $ogName;
+            $request->file('og_image')->storeAs($folder, $ogName, 'r2');
+            $validated['og_image'] = $ogPath;
+        } elseif ($existing) {
+            $validated['og_image'] = $existing->og_image;
+        }
+
         return $validated;
     }
 
@@ -267,6 +290,9 @@ class OrganizationSettingController extends Controller
         }
         if ($setting->banner) {
             Storage::disk('r2')->delete($setting->banner);
+        }
+        if ($setting->og_image) {
+            Storage::disk('r2')->delete($setting->og_image);
         }
     }
 }

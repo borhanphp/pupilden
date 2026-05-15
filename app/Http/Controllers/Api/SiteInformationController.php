@@ -79,6 +79,11 @@ class SiteInformationController extends BaseController
                 'celfin_number' => $settings ? $settings->celfin_number : null,
                 'about_us_content' => $settings ? $settings->about_us_content : null,
                 'privacy_policy_content' => $settings ? $settings->privacy_policy_content : null,
+                'currency_symbol' => $settings && $settings->currency_symbol ? $settings->currency_symbol : 'Tk',
+                'meta_title' => $settings ? $settings->meta_title : null,
+                'meta_description' => $settings ? $settings->meta_description : null,
+                'meta_keywords' => $settings ? $settings->meta_keywords : null,
+                'og_image' => $settings && $settings->og_image ? Storage::disk('r2')->url($settings->og_image) : null,
             ];
             return $this->success('Site information fetched successfully', [
                 'site_information' => $siteInformation

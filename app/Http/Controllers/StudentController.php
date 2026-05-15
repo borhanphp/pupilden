@@ -252,6 +252,82 @@ class StudentController extends Controller
     }
 
     /**
+     * Export students as CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Student::with(['organization', 'courses', 'coursePurchases']);
+
+        if (Auth::user()->userRole->name !== 'superadmin') {
+            $query->where('organization_id', Auth::user()->organization_id);
+        }
+
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('username', 'like', '%' . $request->search . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('organization_id')) {
+            $query->where('organization_id', $request->organization_id);
+        }
+
+        $students = $query->orderBy('created_at', 'desc')->get();
+
+        $filename = 'students_' . now()->format('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
+        ];
+
+        $callback = function () use ($students) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM for Excel UTF-8 compatibility
+            fputs($handle, "\xEF\xBB\xBF");
+
+            // Header row
+            fputcsv($handle, [
+                'ID', 'Name', 'Email', 'Username', 'Contact Number',
+                'Alt Contact', 'Organization', 'Status',
+                'Enrolled Courses', 'Completed Payments', 'Pending Payments',
+                'Total Spent', 'Bio', 'Registered At',
+            ]);
+
+            foreach ($students as $student) {
+                $completedPayments = $student->coursePurchases->where('payment_status', 'completed');
+                fputcsv($handle, [
+                    $student->id,
+                    $student->name,
+                    $student->email,
+                    $student->username,
+                    $student->contact_number ?? '',
+                    $student->alt_contact_number ?? '',
+                    $student->organization?->name ?? '',
+                    $student->is_active ? 'Active' : 'Inactive',
+                    $student->courses->count(),
+                    $completedPayments->count(),
+                    $student->coursePurchases->where('payment_status', 'pending')->count(),
+                    $completedPayments->sum('final_price'),
+                    $student->bio ?? '',
+                    $student->created_at?->format('Y-m-d H:i:s') ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
      * Reset student password
      */
     public function resetPassword(Request $request, Student $student)
