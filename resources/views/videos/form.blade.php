@@ -334,9 +334,9 @@
                 // Handle Cloudflare direct upload for large files (> 500MB)
                 if (videoType == '2' && videoFile) {
                     const fileSizeMB = videoFile.size / (1024 * 1024);
-                    const largeFileThreshold = 500; // 500MB — matches server-side limit in VideoController
+                    const largeFileThreshold = 0; // Always use direct browser→Cloudflare upload (bypasses server queue)
 
-                    if (fileSizeMB > largeFileThreshold) {
+                    if (fileSizeMB >= largeFileThreshold) {
                         // Use direct upload for large files
                         e.preventDefault();
                         await handleDirectUpload(videoFile, title);

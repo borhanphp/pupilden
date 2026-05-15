@@ -625,45 +625,62 @@ class VideoController extends Controller
      */
     private function getCloudflareVideoInfo($videoId)
     {
-        try {
-            if (!env('CLOUDFLARE_API_TOKEN') || !env('CLOUDFLARE_ACCOUNT_ID')) {
-                return [
-                    'success' => false,
-                    'message' => 'Cloudflare credentials not configured'
-                ];
-            }
-
-            $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
-                ->get("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/" . $videoId);
-
-            $data = $response->json();
-
-            if ($response->successful() && isset($data['result'])) {
-                $result = $data['result'];
-
-                return [
-                    'success' => true,
-                    'video_id' => $result['uid'],
-                    'video_url' => $result['playback']['hls'],
-                    'thumbnail_url' => $result['thumbnail'] ?? null,
-                    'file_size' => isset($result['size']) ? (int) $result['size'] : null,
-                    'duration' => isset($result['duration']) ? (int) $result['duration'] : null,
-                ];
-            } else {
-                $errorMessage = isset($data['errors']) ? implode(', ', array_column($data['errors'], 'message')) : 'Unknown error';
-                return [
-                    'success' => false,
-                    'message' => 'Failed to get video info: ' . $errorMessage
-                ];
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Get Cloudflare video info error: ' . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Error getting video info: ' . $e->getMessage()
-            ];
+        if (!env('CLOUDFLARE_API_TOKEN') || !env('CLOUDFLARE_ACCOUNT_ID')) {
+            return ['success' => false, 'message' => 'Cloudflare credentials not configured'];
         }
+
+        // Cloudflare processes videos asynchronously after upload.
+        // Poll up to 5 times (with 2-second pauses) waiting for readyToStream.
+        $maxAttempts = 5;
+        $lastError   = 'Timed out waiting for Cloudflare to process video';
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                $response = Http::withToken(env('CLOUDFLARE_API_TOKEN'))
+                    ->get("https://api.cloudflare.com/client/v4/accounts/" . env('CLOUDFLARE_ACCOUNT_ID') . "/stream/" . $videoId);
+
+                $data = $response->json();
+
+                if ($response->successful() && isset($data['result'])) {
+                    $result = $data['result'];
+                    $hls    = $result['playback']['hls'] ?? null;
+
+                    // Video is registered but still processing — wait and retry
+                    if (!$hls || !($result['readyToStream'] ?? false)) {
+                        Log::info("Cloudflare video {$videoId} still processing (attempt {$attempt}/{$maxAttempts})");
+                        if ($attempt < $maxAttempts) {
+                            sleep(2);
+                            continue;
+                        }
+                        // Last attempt: build HLS URL manually — video will be playable once Cloudflare finishes
+                        $customerCode = config('services.cloudflare.stream_customer_code');
+                        $hls = $hls ?? "https://customer-{$customerCode}.cloudflarestream.com/{$videoId}/manifest/video.m3u8";
+                    }
+
+                    return [
+                        'success'       => true,
+                        'video_id'      => $result['uid'],
+                        'video_url'     => $hls,
+                        'thumbnail_url' => $result['thumbnail'] ?? null,
+                        'file_size'     => isset($result['size']) ? (int) $result['size'] : null,
+                        'duration'      => isset($result['duration']) ? (int) $result['duration'] : null,
+                    ];
+                }
+
+                $lastError = isset($data['errors'])
+                    ? implode(', ', array_column($data['errors'], 'message'))
+                    : ($response->body() ?: 'Unknown error');
+
+            } catch (\Exception $e) {
+                $lastError = $e->getMessage();
+                Log::error("getCloudflareVideoInfo attempt {$attempt} error: " . $e->getMessage());
+            }
+
+            if ($attempt < $maxAttempts) sleep(2);
+        }
+
+        Log::error("getCloudflareVideoInfo failed after {$maxAttempts} attempts for {$videoId}: {$lastError}");
+        return ['success' => false, 'message' => 'Failed to get video info: ' . $lastError];
     }
 
     /**

@@ -52,6 +52,9 @@ return [
     'cloudflare' => [
         'account_id'       => env('CLOUDFLARE_ACCOUNT_ID'),
         'api_token'        => env('CLOUDFLARE_API_TOKEN'),
+        // The short alphanumeric code in your Cloudflare Stream delivery URLs
+        // e.g. customer-XXXXXXXXXXXXXXXX.cloudflarestream.com
+        'stream_customer_code' => env('CLOUDFLARE_STREAM_CUSTOMER_CODE'),
         // Signed token lifetime in seconds (default 2 hours)
         'stream_token_ttl' => env('CLOUDFLARE_STREAM_TOKEN_TTL', 7200),
     ],
