@@ -264,6 +264,120 @@
                             </div>
                         </div>
 
+                        {{-- Site Identity & Contact --}}
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">Site Identity & Contact</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="site_name" class="form-label">Site Name</label>
+                                    <input type="text" name="site_name" id="site_name"
+                                           value="{{ old('site_name', $organizationSetting->site_name ?? $organization->name ?? '') }}"
+                                           class="form-control @error('site_name') is-invalid @enderror"
+                                           placeholder="My LMS Platform">
+                                    @error('site_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="text" name="phone" id="phone"
+                                           value="{{ old('phone', $organizationSetting->phone ?? $organization->phone ?? '') }}"
+                                           class="form-control @error('phone') is-invalid @enderror"
+                                           placeholder="+880 1700-000000">
+                                    @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <input type="text" name="address" id="address"
+                                           value="{{ old('address', $organizationSetting->address ?? $organization->address ?? '') }}"
+                                           class="form-control @error('address') is-invalid @enderror"
+                                           placeholder="123 Main Street, Dhaka">
+                                    @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Social Media Links --}}
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">Social Media Links</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="facebook_url" class="form-label"><i class="fab fa-facebook text-primary"></i> Facebook URL</label>
+                                    <input type="url" name="facebook_url" id="facebook_url"
+                                           value="{{ old('facebook_url', $organizationSetting->facebook_url ?? $organization->facebook ?? '') }}"
+                                           class="form-control @error('facebook_url') is-invalid @enderror"
+                                           placeholder="https://facebook.com/yourpage">
+                                    @error('facebook_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="twitter_url" class="form-label"><i class="fab fa-twitter text-info"></i> Twitter / X URL</label>
+                                    <input type="url" name="twitter_url" id="twitter_url"
+                                           value="{{ old('twitter_url', $organizationSetting->twitter_url ?? $organization->twitter ?? '') }}"
+                                           class="form-control @error('twitter_url') is-invalid @enderror"
+                                           placeholder="https://twitter.com/yourhandle">
+                                    @error('twitter_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="instagram_url" class="form-label"><i class="fab fa-instagram text-danger"></i> Instagram URL</label>
+                                    <input type="url" name="instagram_url" id="instagram_url"
+                                           value="{{ old('instagram_url', $organizationSetting->instagram_url ?? $organization->instagram ?? '') }}"
+                                           class="form-control @error('instagram_url') is-invalid @enderror"
+                                           placeholder="https://instagram.com/yourprofile">
+                                    @error('instagram_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="linkedin_url" class="form-label"><i class="fab fa-linkedin text-primary"></i> LinkedIn URL</label>
+                                    <input type="url" name="linkedin_url" id="linkedin_url"
+                                           value="{{ old('linkedin_url', $organizationSetting->linkedin_url ?? $organization->linkedin ?? '') }}"
+                                           class="form-control @error('linkedin_url') is-invalid @enderror"
+                                           placeholder="https://linkedin.com/company/yourcompany">
+                                    @error('linkedin_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="youtube_url" class="form-label"><i class="fab fa-youtube text-danger"></i> YouTube URL</label>
+                                    <input type="url" name="youtube_url" id="youtube_url"
+                                           value="{{ old('youtube_url', $organizationSetting->youtube_url ?? $organization->youtube ?? '') }}"
+                                           class="form-control @error('youtube_url') is-invalid @enderror"
+                                           placeholder="https://youtube.com/@yourchannel">
+                                    @error('youtube_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="tiktok_url" class="form-label"><i class="fab fa-tiktok"></i> TikTok URL</label>
+                                    <input type="url" name="tiktok_url" id="tiktok_url"
+                                           value="{{ old('tiktok_url', $organizationSetting->tiktok_url ?? $organization->tiktok ?? '') }}"
+                                           class="form-control @error('tiktok_url') is-invalid @enderror"
+                                           placeholder="https://tiktok.com/@yourprofile">
+                                    @error('tiktok_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="pinterest_url" class="form-label"><i class="fab fa-pinterest text-danger"></i> Pinterest URL</label>
+                                    <input type="url" name="pinterest_url" id="pinterest_url"
+                                           value="{{ old('pinterest_url', $organizationSetting->pinterest_url ?? $organization->pinterest ?? '') }}"
+                                           class="form-control @error('pinterest_url') is-invalid @enderror"
+                                           placeholder="https://pinterest.com/yourprofile">
+                                    @error('pinterest_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row mt-3">
                             <div class="col-md-12">
                                 <div class="d-flex justify-content-between">

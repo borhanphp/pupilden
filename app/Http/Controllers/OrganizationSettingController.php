@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use App\Models\OrganizationSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -69,6 +70,16 @@ class OrganizationSettingController extends Controller
             'ngad_number' => 'nullable|string|max:255',
             'rocket_number' => 'nullable|string|max:255',
             'celfin_number' => 'nullable|string|max:255',
+            'site_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:500',
+            'facebook_url' => 'nullable|url|max:500',
+            'twitter_url' => 'nullable|url|max:500',
+            'instagram_url' => 'nullable|url|max:500',
+            'linkedin_url' => 'nullable|url|max:500',
+            'youtube_url' => 'nullable|url|max:500',
+            'tiktok_url' => 'nullable|url|max:500',
+            'pinterest_url' => 'nullable|url|max:500',
         ]);
 
         $validated['organization_id'] = $organizationId;
@@ -108,7 +119,8 @@ class OrganizationSettingController extends Controller
                 ->with('error', 'Unauthorized access.');
         }
 
-        return view('organization-settings.edit', compact('organizationSetting'));
+        $organization = Organization::find($organizationSetting->organization_id);
+        return view('organization-settings.edit', compact('organizationSetting', 'organization'));
     }
 
     /**
@@ -139,12 +151,35 @@ class OrganizationSettingController extends Controller
             'ngad_number' => 'nullable|string|max:255',
             'rocket_number' => 'nullable|string|max:255',
             'celfin_number' => 'nullable|string|max:255',
+            'site_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:500',
+            'facebook_url' => 'nullable|url|max:500',
+            'twitter_url' => 'nullable|url|max:500',
+            'instagram_url' => 'nullable|url|max:500',
+            'linkedin_url' => 'nullable|url|max:500',
+            'youtube_url' => 'nullable|url|max:500',
+            'tiktok_url' => 'nullable|url|max:500',
+            'pinterest_url' => 'nullable|url|max:500',
         ]);
 
         // Handle file uploads
         $validated = $this->handleFileUploads($request, $validated, $organizationSetting->organization_id, $organizationSetting);
 
         $organizationSetting->update($validated);
+
+        // Sync social links and contact info to the Organization model (API reads from there)
+        Organization::where('id', $organizationSetting->organization_id)->update([
+            'phone'     => $request->input('phone'),
+            'address'   => $request->input('address'),
+            'facebook'  => $request->input('facebook_url'),
+            'twitter'   => $request->input('twitter_url'),
+            'instagram' => $request->input('instagram_url'),
+            'linkedin'  => $request->input('linkedin_url'),
+            'youtube'   => $request->input('youtube_url'),
+            'tiktok'    => $request->input('tiktok_url'),
+            'pinterest' => $request->input('pinterest_url'),
+        ]);
 
         return redirect()->route('organization-settings.show', $organizationSetting)
             ->with('success', 'Organization settings updated successfully!');

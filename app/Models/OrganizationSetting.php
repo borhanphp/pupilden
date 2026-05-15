@@ -24,6 +24,16 @@ class OrganizationSetting extends Model
         'ngad_number',
         'rocket_number',
         'celfin_number',
+        'site_name',
+        'phone',
+        'address',
+        'facebook_url',
+        'twitter_url',
+        'instagram_url',
+        'linkedin_url',
+        'youtube_url',
+        'tiktok_url',
+        'pinterest_url',
     ];
 
     public function organization()

@@ -49,7 +49,7 @@ class SiteInformationController extends BaseController
             
             $siteInformation = [
                 'id' => $organization->id,
-                'name' => $organization->name,
+                'name' => $settings && $settings->site_name ? $settings->site_name : $organization->name,
                 'slug' => $organization->slug,
                 'custom_domain' => $organization->custom_domain,
                 'address' => $organization->address,

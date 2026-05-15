@@ -42,18 +42,28 @@
     <link rel="stylesheet" href="{{asset('assets/css/app-overrides.css')}}" />
   </head>
   <body>
+    @php
+      $orgLogo = null;
+      if (auth()->check()) {
+          $orgSetting = \App\Models\OrganizationSetting::where('organization_id', auth()->user()->organization_id)->first();
+          if ($orgSetting && $orgSetting->logo) {
+              $orgLogo = \Illuminate\Support\Facades\Storage::disk('r2')->url($orgSetting->logo);
+          }
+      }
+    @endphp
     <div class="wrapper">
       <!-- Sidebar -->
       <div class="sidebar" data-background-color="dark">
         <div class="sidebar-logo">
           <!-- Logo Header -->
           <div class="logo-header" data-background-color="dark">
-            <a href="index.html" class="logo">
+            <a href="{{ route('dashboard') }}" class="logo">
               <img
-                src="assets/img/kaiadmin/logo_light.svg"
+                src="{{ $orgLogo ?? asset('assets/img/kaiadmin/logo_light.svg') }}"
                 alt="navbar brand"
                 class="navbar-brand"
-                height="20"
+                height="40"
+                style="max-width:160px; object-fit:contain;"
               />
             </a>
             <div class="nav-toggle">
@@ -83,12 +93,13 @@
           <div class="main-header-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-              <a href="index.html" class="logo">
+              <a href="{{ route('dashboard') }}" class="logo">
                 <img
-                  src="assets/img/kaiadmin/logo_light.svg"
+                  src="{{ $orgLogo ?? asset('assets/img/kaiadmin/logo_light.svg') }}"
                   alt="navbar brand"
                   class="navbar-brand"
-                  height="20"
+                  height="40"
+                  style="max-width:160px; object-fit:contain;"
                 />
               </a>
               <div class="nav-toggle">
