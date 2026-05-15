@@ -15,7 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Exempt Cloudflare webhook from CSRF — it's a server-to-server POST with no session
+        $middleware->validateCsrfTokens(except: [
+            'videos/cloudflare-webhook',
+        ]);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

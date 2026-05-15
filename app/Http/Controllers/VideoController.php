@@ -390,8 +390,26 @@ class VideoController extends Controller
 
             // Handle different video types
             if ($request->video_type == 2) {
-                // Cloudflare Stream - only upload if new file provided
-                if ($request->hasFile('video_file')) {
+                // Cloudflare Stream — direct browser upload (large files via JS)
+                if ($request->has('cloudflare_upload_id')) {
+                    $uploadId = $request->cloudflare_upload_id;
+                    $videoInfo = $this->getCloudflareVideoInfo($uploadId);
+
+                    if ($videoInfo['success']) {
+                        $videoData['video_url']           = $videoInfo['video_url'];
+                        $videoData['cloudflare_video_id'] = $videoInfo['video_id'];
+                        $videoData['thumbnail_url']       = $videoInfo['thumbnail_url'];
+                        $videoData['file_size']           = $videoInfo['file_size'] ?? null;
+                        $videoData['duration']            = $videoInfo['duration'] ?? $request->duration;
+                        $videoData['upload_status']       = 'completed';
+                        $videoData['upload_progress']     = 100;
+                    } else {
+                        return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Error retrieving video from Cloudflare: ' . $videoInfo['message']);
+                    }
+                } elseif ($request->hasFile('video_file')) {
+                    // Server-side upload for smaller files (< 500MB)
                     $file = $request->file('video_file');
 
                     // Store file temporarily

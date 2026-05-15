@@ -109,13 +109,13 @@ class Video extends Model
             return Storage::disk('r2')->url($this->attributes['preview_image']);
         }
         
-        if ($this->attributes['video_type'] === 1 && ($this->attributes['video_url'] ?? null)) {
+        if ((int)($this->attributes['video_type'] ?? 0) === 1 && ($this->attributes['video_url'] ?? null)) {
             // YouTube video thumbnail
             $videoId = $this->extractYouTubeVideoId($this->attributes['video_url']);
             if ($videoId) {
                 return "https://img.youtube.com/vi/{$videoId}/maxresdefault.jpg";
             }
-        } elseif ($this->attributes['video_type'] === 2 && ($this->attributes['thumbnail_url'] ?? null)) {
+        } elseif ((int)($this->attributes['video_type'] ?? 0) === 2 && ($this->attributes['thumbnail_url'] ?? null)) {
             // Cloudflare video thumbnail (accessing raw database value)
             return $this->attributes['thumbnail_url'];
         }

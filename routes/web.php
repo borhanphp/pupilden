@@ -31,6 +31,9 @@ use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 
+// Cloudflare Stream webhook — must be outside auth, exempt from CSRF (Cloudflare POSTs here with no session)
+Route::post('videos/cloudflare-webhook', [VideoController::class, 'cloudflareWebhook'])->name('videos.cloudflare-webhook');
+
 // Google OAuth for Gmail (obtain refresh token – callback must match GOOGLE_REDIRECT_URI in .env)
 Route::get('google/oauth', [GoogleOAuthController::class, 'redirect'])->name('google.oauth');
 Route::get('google/callback', [GoogleOAuthController::class, 'callback'])->name('google.callback');
@@ -63,7 +66,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('videos', VideoController::class);
     Route::post('videos/update-order', [VideoController::class, 'updateOrder'])->name('videos.update-order');
     Route::post('videos/direct-upload-url', [VideoController::class, 'getDirectUploadUrl'])->name('videos.direct-upload-url');
-    Route::post('videos/cloudflare-webhook', [VideoController::class, 'cloudflareWebhook'])->name('videos.cloudflare-webhook');
     Route::resource('exams', ExamController::class);
     Route::post('exams/{exam}/toggle-published', [ExamController::class, 'togglePublished'])->name('exams.toggle-published');
     Route::resource('questions', QuestionController::class);
