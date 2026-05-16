@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrganizationSetting;
 use App\Models\Slider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,12 +35,27 @@ class SliderController extends Controller
 
     public function index()
     {
-        $sliders = Slider::where('organization_id', auth()->user()->organization_id)
+        $orgId = auth()->user()->organization_id;
+        $sliders = Slider::where('organization_id', $orgId)
             ->orderBy('sort_order')
             ->orderByDesc('id')
             ->get();
 
-        return view('sliders.index', compact('sliders'));
+        $setting = OrganizationSetting::where('organization_id', $orgId)->first();
+
+        return view('sliders.index', compact('sliders', 'setting'));
+    }
+
+    public function saveDesign(Request $request)
+    {
+        $request->validate(['slider_design' => 'required|in:classic,split,cinematic']);
+
+        $orgId = auth()->user()->organization_id;
+        OrganizationSetting::where('organization_id', $orgId)
+            ->update(['slider_design' => $request->slider_design]);
+
+        return redirect()->route('sliders.index')
+            ->with('success', 'Slider design updated successfully.');
     }
 
     public function create()

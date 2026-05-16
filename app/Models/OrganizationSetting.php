@@ -39,6 +39,7 @@ class OrganizationSetting extends Model
         'meta_description',
         'meta_keywords',
         'og_image',
+        'slider_design',
     ];
 
     public function organization()

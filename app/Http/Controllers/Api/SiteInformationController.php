@@ -80,6 +80,7 @@ class SiteInformationController extends BaseController
                 'about_us_content' => $settings ? $settings->about_us_content : null,
                 'privacy_policy_content' => $settings ? $settings->privacy_policy_content : null,
                 'currency_symbol' => $settings && $settings->currency_symbol ? $settings->currency_symbol : 'Tk',
+                'slider_design' => $settings ? ($settings->slider_design ?? 'classic') : 'classic',
                 'meta_title' => $settings ? $settings->meta_title : null,
                 'meta_description' => $settings ? $settings->meta_description : null,
                 'meta_keywords' => $settings ? $settings->meta_keywords : null,

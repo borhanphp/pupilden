@@ -22,7 +22,7 @@ class CoursePurchaseController extends Controller
             $validator = Validator::make($request->all(), [
                 'course_id' => 'required|exists:courses,id',
                 'coupon_code' => 'nullable|string|max:50',
-                'payment_method' => 'required|string',
+                'payment_method' => 'nullable|string',
                 'payment_details' => 'nullable|array'
             ]);
 
@@ -103,7 +103,8 @@ class CoursePurchaseController extends Controller
                 $discountAmount = $coupon->calculateDiscount($originalPrice);
             }
 
-            $finalPrice = $originalPrice - $discountAmount;
+            $finalPrice = max(0, $originalPrice - $discountAmount);
+            $isFree = $finalPrice == 0;
 
             // Create purchase record
             $purchase = CoursePurchase::create([
@@ -113,17 +114,17 @@ class CoursePurchaseController extends Controller
                 'original_price' => $originalPrice,
                 'discount_amount' => $discountAmount,
                 'final_price' => $finalPrice,
-                'payment_method' => $request->payment_method,
-                'payment_status' => 'pending',
+                'payment_method' => $isFree ? 'coupon_free' : ($request->payment_method ?? 'manual'),
+                'payment_status' => $isFree ? 'completed' : 'pending',
                 'payment_details' => $request->payment_details ?? []
             ]);
 
-            // For now, we'll simulate a successful payment
-            // In a real application, you would integrate with payment gateways here
             $transactionId = 'TXN_' . time() . '_' . $purchase->id;
-            
-            // Mark as completed and enroll student
-            //$purchase->markAsCompleted($transactionId, $request->payment_method);
+
+            // If 100% coupon discount — auto-complete and enroll immediately
+            if ($isFree) {
+                $purchase->markAsCompleted($transactionId, 'coupon_free');
+            }
 
             // Increment coupon usage if used
             if ($coupon) {
@@ -132,7 +133,9 @@ class CoursePurchaseController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Course purchased successfully',
+                'message' => $isFree
+                    ? 'Course enrolled successfully with 100% discount!'
+                    : 'Purchase submitted. Awaiting payment confirmation.',
                 'data' => [
                     'purchase_id' => $purchase->id,
                     'course' => [
@@ -153,7 +156,8 @@ class CoursePurchaseController extends Controller
                         'value' => $coupon->value,
                     ] : null,
                     'transaction_id' => $transactionId,
-                    'payment_status' => 'completed',
+                    'payment_status' => $isFree ? 'completed' : 'pending',
+                    'is_free' => $isFree,
                     'purchased_at' => $purchase?->purchased_at?->toISOString(),
                 ]
             ], 201);

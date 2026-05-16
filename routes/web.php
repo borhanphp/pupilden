@@ -99,6 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('payment-gateways/{paymentGateway}/set-default', [PaymentGatewayController::class, 'setDefault'])->name('payment-gateways.set-default');
 
     Route::resource('sliders', SliderController::class)->except(['show']);
+    Route::post('sliders-design', [SliderController::class, 'saveDesign'])->name('sliders.save-design');
     Route::post('sliders/upload-description-image', [SliderController::class, 'uploadDescriptionImage'])
         ->name('sliders.upload-description-image');
     Route::post('editor/upload-image', [EditorImageUploadController::class, 'upload'])
