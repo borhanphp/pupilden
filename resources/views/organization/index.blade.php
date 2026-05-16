@@ -772,7 +772,7 @@
             
             if (actionButtons.style.display === 'none' || actionButtons.style.display === '') {
                 actionButtons.style.display = 'flex';
-                form.querySelector('.btn-primary').innerHTML = '<i class="fas fa-eye"></i> View Only';
+                form.querySelector('.btn-primary').innerHTML = '<i class="fas fa-eye"></i> Save Changes';
             } else {
                 actionButtons.style.display = 'none';
                 form.querySelector('.btn-primary').innerHTML = '<i class="fas fa-edit"></i> Edit Profile';
