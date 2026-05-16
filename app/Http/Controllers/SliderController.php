@@ -48,7 +48,7 @@ class SliderController extends Controller
 
     public function saveDesign(Request $request)
     {
-        $request->validate(['slider_design' => 'required|in:classic,split,cinematic']);
+        $request->validate(['slider_design' => 'required|in:classic,split,cinematic,basic']);
 
         $orgId = auth()->user()->organization_id;
         OrganizationSetting::where('organization_id', $orgId)

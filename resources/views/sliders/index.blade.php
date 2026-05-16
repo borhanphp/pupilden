@@ -112,22 +112,58 @@
                                             </div>
                                             <div class="position-absolute top-0 end-0 h-100 d-flex align-items-center pe-2 text-white opacity-50" style="font-size:1.5rem;">▶</div>
                                             <div class="position-absolute bottom-0 end-0 text-white pe-2 pb-1" style="font-size:.65rem;opacity:.6;">01 / 03</div>
-                                        </div>
-                                        <div class="p-3">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <strong>Cinematic</strong>
-                                                    <p class="text-muted small mb-0">Wide full-height hero, left-side text, slide counter &amp; arrow nav.</p>
-                                                </div>
-                                                @if($currentDesign === 'cinematic')
-                                                    <span class="badge bg-primary ms-2 flex-shrink-0">Active</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </label>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>Cinematic</strong>
+                                    <p class="text-muted small mb-0">Wide full-height hero, left-side text, slide counter &amp; arrow nav.</p>
+                                </div>
+                                @if($currentDesign === 'cinematic')
+                                    <span class="badge bg-primary ms-2 flex-shrink-0">Active</span>
+                                @endif
                             </div>
                         </div>
+                    </div>
+                </label>
+            </div>
+
+            {{-- Design 4: Basic Slide --}}
+            <div class="col-md-4">
+                <label class="d-block cursor-pointer h-100">
+                    <input type="radio" name="slider_design" value="basic" class="d-none design-radio"
+                           {{ $currentDesign === 'basic' ? 'checked' : '' }}>
+                    <div class="design-card border rounded-3 overflow-hidden h-100 {{ $currentDesign === 'basic' ? 'border-primary border-2 shadow' : '' }}"
+                         style="cursor:pointer;">
+                        <div class="position-relative" style="height:120px; background:#111; overflow:hidden;">
+                            {{-- Simulated slide panels --}}
+                            <div class="position-absolute top-0 bottom-0 d-flex align-items-center" style="left:8px;right:8px;">
+                                <div class="rounded-2 me-2 flex-shrink-0" style="width:75%;height:90px;background:linear-gradient(120deg,#1a1a2e,#4a4080);display:flex;align-items:center;justify-content:center;">
+                                    <div class="text-white text-center px-2">
+                                        <div class="bg-white rounded mb-1 mx-auto" style="width:70%;height:7px;opacity:.9;"></div>
+                                        <div class="bg-white rounded mx-auto" style="width:50%;height:5px;opacity:.55;"></div>
+                                    </div>
+                                </div>
+                                <div class="rounded-2 flex-shrink-0" style="width:20%;height:90px;background:linear-gradient(120deg,#302b63,#667eea);opacity:.5;"></div>
+                            </div>
+                            {{-- Arrow icon hinting direction --}}
+                            <div class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white" style="font-size:.85rem;opacity:.8;">←</div>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>Basic Slide</strong>
+                                    <p class="text-muted small mb-0">Slides glide in from right to left with arrow navigation.</p>
+                                </div>
+                                @if($currentDesign === 'basic')
+                                    <span class="badge bg-primary ms-2 flex-shrink-0">Active</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Design
                         </button>
