@@ -107,6 +107,11 @@ class OrganizationController extends Controller
             'ngad_number' => 'nullable|string|max:255',
             'rocket_number' => 'nullable|string|max:255',
             'celfin_number' => 'nullable|string|max:255',
+            'currency_symbol' => 'nullable|string|max:10',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:500',
+            'og_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $settings = OrganizationSetting::where('organization_id', $organizationId)->first();
@@ -170,6 +175,19 @@ class OrganizationController extends Controller
             $validated['banner'] = $bannerPath;
         } elseif ($existing) {
             $validated['banner'] = $existing->banner;
+        }
+
+        // Handle og_image upload
+        if ($request->hasFile('og_image')) {
+            if ($existing && $existing->og_image) {
+                Storage::disk('r2')->delete($existing->og_image);
+            }
+            $ogName = 'og_image_' . time() . '.' . $request->file('og_image')->getClientOriginalExtension();
+            $ogPath = $folder . '/' . $ogName;
+            $request->file('og_image')->storeAs($folder, $ogName, 'r2');
+            $validated['og_image'] = $ogPath;
+        } elseif ($existing) {
+            $validated['og_image'] = $existing->og_image;
         }
 
         return $validated;
