@@ -230,7 +230,21 @@ class StudentAuthController extends BaseController
                 return $this->error('Student not found', ['error' => 'Student not found']);
             }
             $token = Password::broker('students')->createToken($student);
-            $resetUrl = rtrim(config('app.student_password_reset_url'), '/') . '/reset-password?token=' . $token . '&email=' . urlencode($student->email);
+            // Detect protocol: honour X-Forwarded-Proto (set by reverse proxies) then
+            // fall back to isSecure(), and default to https for non-localhost hosts.
+            $forwardedProto = $request->header('X-Forwarded-Proto');
+            $hostname        = $request->domain_name;
+            $isLocalhost     = in_array($hostname, ['localhost', '127.0.0.1', '::1'])
+                               || str_ends_with($hostname, '.local');
+            if ($forwardedProto) {
+                $protocol = $forwardedProto;
+            } elseif ($request->isSecure()) {
+                $protocol = 'https';
+            } else {
+                $protocol = $isLocalhost ? 'http' : 'https';
+            }
+            $resetBase = $protocol . '://' . rtrim($hostname, '/');
+            $resetUrl  = $resetBase . '/reset-password?token=' . $token . '&email=' . urlencode($student->email);
             $this->gmailService->send(
                 $student->email,
                 'Password Reset',
@@ -250,7 +264,7 @@ class StudentAuthController extends BaseController
             $request->validate([
                 'email' => 'required|email',
                 'token' => 'required|string',
-                'new_password' => 'required|string|min:6|confirmed',
+                'new_password' => 'required|string|min:8|confirmed',
             ]);
 
             $status = Password::broker('students')->reset(
