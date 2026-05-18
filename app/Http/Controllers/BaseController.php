@@ -12,20 +12,22 @@ class BaseController extends Controller
     function success($message, $options = [])
     {
         $default = [
-            'status' => true,
+            'status'  => true,
+            'success' => true,
             'message' => $message
         ];
         $merge = array_merge($default, $options);
         return response()->json($merge, 200);
     }
    
-    function error($message, $options = [])
+    function error($message, $options = [], $statusCode = 422)
     {
         $default = [
-            'status' => false,
+            'status'  => false,
+            'success' => false,
             'message' => $message
         ];
         $merge = array_merge($default, $options);
-        return response()->json($merge, 200);
+        return response()->json($merge, $statusCode);
     }
 }
