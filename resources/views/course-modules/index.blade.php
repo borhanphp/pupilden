@@ -97,7 +97,7 @@
                                             <div>
                                                 <strong>{{ $module->name }}</strong>
                                             </div>
-                                            <small class="text-muted">{{ Str::limit($module->description, 50) }}</small>
+                                            <small class="text-muted">{{ Str::limit(strip_tags($module->description), 50) }}</small>
                                         </td>
                                         <td>
                                             @if($module->course)

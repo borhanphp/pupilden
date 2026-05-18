@@ -99,7 +99,7 @@
                                 </tr>
                                 <tr>
                                     <th>Hero Text</th>
-                                    <td>{{ $organizationSetting->hero_text ?? '-' }}</td>
+                                    <td>{!! strip_tags($organizationSetting->hero_text ?? '-') !!}</td>
                                 </tr>
                                 <tr>
                                     <th>Business Email</th>
@@ -126,7 +126,7 @@
                             <h5 class="mb-3">About Us Content</h5>
                             <div class="card bg-light">
                                 <div class="card-body">
-                                    <p>{{ $organizationSetting->about_us_content ?? 'No content set.' }}</p>
+                                    <div>{!! $organizationSetting->about_us_content ?? '<span class="text-muted">No content set.</span>' !!}</div>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +134,7 @@
                             <h5 class="mb-3">Privacy Policy Content</h5>
                             <div class="card bg-light">
                                 <div class="card-body">
-                                    <p>{{ $organizationSetting->privacy_policy_content ?? 'No content set.' }}</p>
+                                    <div>{!! $organizationSetting->privacy_policy_content ?? '<span class="text-muted">No content set.</span>' !!}</div>
                                 </div>
                             </div>
                         </div>

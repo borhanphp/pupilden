@@ -95,7 +95,7 @@
                                 <label class="form-label fw-bold">Description</label>
                                 <div class="form-control-plaintext">
                                     @if($courseModule->description)
-                                        {{ $courseModule->description }}
+                                        {!! $courseModule->description !!}
                                     @else
                                         <span class="text-muted">No description provided</span>
                                     @endif

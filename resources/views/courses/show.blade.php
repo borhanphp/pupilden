@@ -45,9 +45,9 @@
                                     
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Description</label>
-                                        <p class="form-control-plaintext">
-                                            {{ $course->description ?: 'No description provided' }}
-                                        </p>
+                                        <div class="form-control-plaintext">
+                                            {!! $course->description ?: '<span class="text-muted">No description provided</span>' !!}
+                                        </div>
                                     </div>
 
                                     <div class="row">

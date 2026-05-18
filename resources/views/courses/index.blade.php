@@ -71,7 +71,7 @@
                                                     <span class="badge bg-secondary ms-1">Archived</span>
                                                 @endif
                                             </div>
-                                            <small class="text-muted">{{ Str::limit($course->description, 50) }}</small>
+                                            <small class="text-muted">{{ Str::limit(strip_tags($course->description), 50) }}</small>
                                         </td>
                                         <td>
                                             @if($course->courseCategory)

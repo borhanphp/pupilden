@@ -203,7 +203,7 @@
                                                                 <span class="badge bg-warning text-dark ms-1">Featured</span>
                                                             @endif
                                                         </div>
-                                                        <small class="text-muted">{{ Str::limit($course->description, 50) }}</small>
+                                                        <small class="text-muted">{{ Str::limit(strip_tags($course->description), 50) }}</small>
                                                     </td>
                                                     <td>
                                                         @if($course->courseCategory)
