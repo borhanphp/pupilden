@@ -39,4 +39,11 @@ class Organization extends Model
     {
         return $this->hasOne(OrganizationSetting::class);
     }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'organization_teacher')
+                    ->withPivot('role', 'status', 'invited_by')
+                    ->withTimestamps();
+    }
 }

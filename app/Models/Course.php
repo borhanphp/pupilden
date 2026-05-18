@@ -11,6 +11,7 @@ class Course extends Model
 
     protected $fillable = [
         'organization_id',
+        'teacher_id',
         'name',
         'slug',
         'description',
@@ -44,6 +45,11 @@ class Course extends Model
     public function organization()
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
     }
 
     public function courseCategory()

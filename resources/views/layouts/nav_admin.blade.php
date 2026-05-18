@@ -150,7 +150,7 @@
     </li>
     <li class="nav-item">
       <a data-bs-toggle="collapse" href="#student">
-        <i class="fas fa-pen-square"></i>
+        <i class="fas fa-user-graduate"></i>
         <p>Student</p>
         <span class="caret"></span>
       </a>
@@ -164,6 +164,28 @@
           <li>
             <a href="{{route('student-courses.index')}}">
               <span class="sub-item">Student Courses</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a data-bs-toggle="collapse" href="#teacher">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <p>Teacher</p>
+        <span class="caret"></span>
+      </a>
+      <div class="collapse" id="teacher">
+        <ul class="nav nav-collapse">
+          <li>
+            <a href="{{route('teachers.index')}}">
+              <span class="sub-item">All Teachers</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('teachers.create')}}">
+              <span class="sub-item">Add Teacher</span>
             </a>
           </li>
         </ul>

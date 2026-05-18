@@ -27,6 +27,7 @@ use App\Http\Controllers\SeoSettingController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentCourseController;
+use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
@@ -80,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('course-module-files/{courseModuleFile}/download', [CourseModuleFileController::class, 'download'])->name('course-module-files.download');
     Route::resource('students', StudentController::class);
     Route::get('students-export', [StudentController::class, 'export'])->name('students.export');
+    Route::resource('teachers', TeacherController::class);
     Route::get('students/{student}/payments', [StudentController::class, 'payments'])->name('students.payments');
     Route::post('students/{student}/toggle-status', [StudentController::class, 'toggleStatus'])->name('students.toggle-status');
     Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');
