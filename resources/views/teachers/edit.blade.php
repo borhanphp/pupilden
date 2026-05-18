@@ -136,22 +136,25 @@
                     </div>
 
                     <hr>
-                    <div class="d-flex justify-content-between">
-                        <form action="{{ route('teachers.destroy', $teacher) }}" method="POST"
-                              onsubmit="return confirm('Remove this teacher from your organization?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                <i class="fas fa-user-minus me-1"></i> Remove from Org
-                            </button>
-                        </form>
-                        <div>
-                            <a href="{{ route('teachers.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Save Changes
-                            </button>
-                        </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ route('teachers.index') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
                     </div>
                 </form>
+
+                {{-- Delete form is OUTSIDE the update form to prevent nested-form conflicts --}}
+                <hr>
+                <div class="d-flex justify-content-start">
+                    <form action="{{ route('teachers.destroy', $teacher) }}" method="POST"
+                          onsubmit="return confirm('Remove this teacher from your organization? This cannot be undone.')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-user-minus me-1"></i> Remove from Organization
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
