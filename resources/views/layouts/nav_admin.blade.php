@@ -149,6 +149,27 @@
       </div>
     </li>
     <li class="nav-item">
+      <a data-bs-toggle="collapse" href="#blog">
+        <i class="fas fa-newspaper"></i>
+        <p>Blog</p>
+        <span class="caret"></span>
+      </a>
+      <div class="collapse" id="blog">
+        <ul class="nav nav-collapse">
+          <li>
+            <a href="{{route('blogs.index')}}">
+              <span class="sub-item">All Posts</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{route('blogs.create')}}">
+              <span class="sub-item">Add Post</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item">
       <a data-bs-toggle="collapse" href="#student">
         <i class="fas fa-user-graduate"></i>
         <p>Student</p>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\BlogPostController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CourseCategoryController;
@@ -64,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('course-categories', CourseCategoryController::class);
     Route::resource('course-sub-categories', CourseSubCategoryController::class);
     Route::resource('courses', CourseController::class);
+    Route::resource('blogs', BlogPostController::class);
     Route::resource('videos', VideoController::class);
     Route::post('videos/update-order', [VideoController::class, 'updateOrder'])->name('videos.update-order');
     Route::post('videos/direct-upload-url', [VideoController::class, 'getDirectUploadUrl'])->name('videos.direct-upload-url');

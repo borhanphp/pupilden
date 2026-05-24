@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Student\ExamAttemptController;
 use App\Http\Controllers\Api\Student\AIExamGradingController;
 use App\Http\Controllers\Api\Student\PurchasedCourceController;
 use App\Http\Controllers\Api\PublicCourseController;
+use App\Http\Controllers\Api\PublicBlogPostController;
 use App\Http\Controllers\Api\SiteInformationController;
 use App\Http\Controllers\Api\Student\SocialAuthController;
 
@@ -79,6 +80,12 @@ Route::get('/courses/categories', [PublicCourseController::class, 'categories'])
 Route::get('/courses/category/{categoryId}', [PublicCourseController::class, 'byCategory']);
 Route::get('/courses/search', [PublicCourseController::class, 'search']);
 Route::get('/courses/statistics', [PublicCourseController::class, 'statistics']);
+
+// Public Blog routes
+Route::get('/blogs', [PublicBlogPostController::class, 'index']);
+Route::get('/blogs/featured', [PublicBlogPostController::class, 'featured']);
+Route::get('/blogs/single/{slug}', [PublicBlogPostController::class, 'show']);
+
 Route::get('/sliders', [SiteInformationController::class, 'sliders']);
 // Site information routes
 Route::get('/site-information', [SiteInformationController::class, 'siteInformation']);
