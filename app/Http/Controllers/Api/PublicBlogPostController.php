@@ -110,8 +110,26 @@ class PublicBlogPostController extends BaseController
                 ];
             });
 
+            // Get all unique tags for the organization
+            $activeTags = BlogPost::where('organization_id', $organizationId)
+                ->where('is_published', true)
+                ->where(function($q) {
+                    $q->whereNull('published_at')
+                      ->orWhere('published_at', '<=', now()->addHours(15));
+                })
+                ->whereNotNull('tags')
+                ->pluck('tags')
+                ->flatMap(function($tags) {
+                    return array_map('trim', explode(',', $tags));
+                })
+                ->unique()
+                ->filter()
+                ->values()
+                ->toArray();
+
             return $this->success('Blog posts retrieved successfully', [
                 'posts' => $posts->items(),
+                'tags' => $activeTags,
                 'pagination' => [
                     'current_page' => $posts->currentPage(),
                     'last_page' => $posts->lastPage(),
