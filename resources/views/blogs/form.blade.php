@@ -12,6 +12,7 @@
                 <div class="card-body">
                     <form action="{{ isset($blog) ? route('blogs.update', $blog) : route('blogs.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="timezone" id="timezone">
                         @if(isset($blog))
                             @method('PUT')
                         @endif
@@ -211,4 +212,15 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const tzInput = document.getElementById('timezone');
+                if (tzInput) {
+                    tzInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                }
+            });
+        </script>
+    @endpush
 @endsection

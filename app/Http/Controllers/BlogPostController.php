@@ -60,7 +60,18 @@ class BlogPostController extends Controller
             }
 
             // Set publication timestamp
-            $publishedAt = $request->published_at ? Carbon::parse($request->published_at) : null;
+            $publishedAt = null;
+            if ($request->published_at) {
+                if ($request->timezone) {
+                    try {
+                        $publishedAt = Carbon::parse($request->published_at, $request->timezone)->timezone('UTC');
+                    } catch (\Exception $e) {
+                        $publishedAt = Carbon::parse($request->published_at);
+                    }
+                } else {
+                    $publishedAt = Carbon::parse($request->published_at);
+                }
+            }
             if ($request->has('is_published') && !$publishedAt) {
                 $publishedAt = now();
             }
@@ -161,7 +172,18 @@ class BlogPostController extends Controller
             }
 
             // Set publication timestamp
-            $publishedAt = $request->published_at ? Carbon::parse($request->published_at) : null;
+            $publishedAt = null;
+            if ($request->published_at) {
+                if ($request->timezone) {
+                    try {
+                        $publishedAt = Carbon::parse($request->published_at, $request->timezone)->timezone('UTC');
+                    } catch (\Exception $e) {
+                        $publishedAt = Carbon::parse($request->published_at);
+                    }
+                } else {
+                    $publishedAt = Carbon::parse($request->published_at);
+                }
+            }
             if ($request->has('is_published') && !$publishedAt) {
                 $publishedAt = $blog->published_at ?? now();
             }

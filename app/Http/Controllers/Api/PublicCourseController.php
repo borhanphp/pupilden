@@ -23,7 +23,13 @@ class PublicCourseController extends BaseController
             return ['error' => 'Domain name is required'];
         }
         
-        $domain = Domain::where('domain_name', $request->domain_name)->first();
+        $domainName = $request->domain_name;
+        if (in_array($domainName, ['localhost', '127.0.0.1', '::1'])) {
+            $domain = Domain::where('is_active', true)->first();
+        } else {
+            $domain = Domain::where('domain_name', $domainName)->first();
+        }
+        
         if(!$domain){
             return ['error' => 'Domain not found'];
         }
