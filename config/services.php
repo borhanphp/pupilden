@@ -38,6 +38,7 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URL')),
         'redirect_uri' => env('GOOGLE_REDIRECT_URI', env('GOOGLE_REDIRECT_URL')),
         'refresh_token' => env('GOOGLE_REFRESH_TOKEN'),
         'credentials_path' => env('GOOGLE_AUTH_CONFIG'), // e.g. app/private/google/oauth-credentials.json
@@ -46,6 +47,7 @@ return [
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI'),
         'redirect_uri' => env('FACEBOOK_REDIRECT_URI'),
     ],
 
