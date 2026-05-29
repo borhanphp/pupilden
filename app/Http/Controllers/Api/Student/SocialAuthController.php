@@ -42,6 +42,7 @@ class SocialAuthController extends BaseController
      */
     public function callback(Request $request, $provider)
     {
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
         try {
             $redirectUrl = url('/api/student/auth/' . $provider . '/callback');
             
@@ -55,13 +56,25 @@ class SocialAuthController extends BaseController
             $domainName = $state['domain_name'] ?? null;
             
             if (!$domainName) {
-                return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Domain name is missing in state.'));
+                return redirect($frontendUrl . '/auth/callback?error=' . urlencode('Domain name is missing in state.'));
             }
 
             $domain = Domain::where('domain_name', $domainName)->first();
             
             if (!$domain) {
-                return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Invalid domain name.'));
+                return redirect($frontendUrl . '/auth/callback?error=' . urlencode('Invalid domain name.'));
+            }
+
+            // Determine frontend URL dynamically based on domain name
+            $isLocalhost = in_array($domainName, ['localhost', '127.0.0.1', '::1'])
+                || str_ends_with($domainName, '.local');
+            
+            if ($isLocalhost) {
+                $frontendUrl = 'http://localhost:3000';
+            } else {
+                $forwardedProto = $request->header('X-Forwarded-Proto');
+                $protocol = $forwardedProto ?: ($request->isSecure() ? 'https' : 'https');
+                $frontendUrl = $protocol . '://' . $domainName;
             }
 
             // Find or create student
@@ -98,7 +111,7 @@ class SocialAuthController extends BaseController
             }
 
             if (!$student->is_active) {
-                return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Student is not active.'));
+                return redirect($frontendUrl . '/auth/callback?error=' . urlencode('Student is not active.'));
             }
 
             $token = $student->createToken('student_auth', ['student'])->plainTextToken;
@@ -112,11 +125,11 @@ class SocialAuthController extends BaseController
                 'profile_picture' => $student->profile_picture,
             ]);
 
-            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?token=' . $token . '&student=' . urlencode($studentData));
+            return redirect($frontendUrl . '/auth/callback?token=' . $token . '&student=' . urlencode($studentData));
 
         } catch (\Throwable $e) {
             Log::error('Social Login Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return redirect(env('FRONTEND_URL', 'http://localhost:3000') . '/auth/callback?error=' . urlencode('Authentication failed: ' . $e->getMessage()));
+            return redirect($frontendUrl . '/auth/callback?error=' . urlencode('Authentication failed: ' . $e->getMessage()));
         }
     }
 }
