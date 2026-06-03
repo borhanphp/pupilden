@@ -51,6 +51,32 @@
                                     @enderror
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">Duration (Minutes)</label>
+                                    <input type="number" 
+                                           name="duration" 
+                                           id="duration" 
+                                           value="{{ old('duration', $exam->duration ?? '') }}"
+                                           class="form-control @error('duration') is-invalid @enderror"
+                                           placeholder="e.g., 60 (leave empty for unlimited time)"
+                                           min="1">
+                                    @error('duration')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea name="description" 
+                                              id="description" 
+                                              class="form-control @error('description') is-invalid @enderror" 
+                                              rows="3" 
+                                              placeholder="Enter exam description...">{{ old('description', $exam->description ?? '') }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">

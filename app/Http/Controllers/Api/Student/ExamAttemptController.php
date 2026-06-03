@@ -254,12 +254,14 @@ class ExamAttemptController extends Controller
                     'submitted_at' => $attempt->submitted_at->toISOString(),
                     'answers' => $attempt->answers->map(function($answer) {
                         return [
+                            'answer_id' => $answer->id,
                             'question_id' => $answer->question_id,
                             'question_text' => $answer->question->question_text,
                             'your_answer' => $answer->answer_text,
                             'correct_answer' => $answer->question->correct_answer,
                             'is_correct' => $answer->is_correct,
                             'marks_awarded' => $answer->marks_awarded,
+                            'feedback' => $answer->feedback,
                             'total_marks' => $answer->question->marks
                         ];
                     })
@@ -366,6 +368,7 @@ class ExamAttemptController extends Controller
                     'reviewed_at' => $attempt->reviewed_at?->toISOString(),
                     'answers' => $attempt->answers->map(function($answer) {
                         return [
+                            'answer_id' => $answer->id,
                             'question_id' => $answer->question_id,
                             'question' => [
                                 'id' => $answer->question->id,
@@ -377,7 +380,8 @@ class ExamAttemptController extends Controller
                             ],
                             'your_answer' => $answer->answer_text,
                             'is_correct' => $answer->is_correct,
-                            'marks_awarded' => $answer->marks_awarded
+                            'marks_awarded' => $answer->marks_awarded,
+                            'feedback' => $answer->feedback
                         ];
                     })
                 ]

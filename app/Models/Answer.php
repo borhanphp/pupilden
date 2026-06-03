@@ -15,6 +15,7 @@ class Answer extends Model
         'answer_text',
         'is_correct',
         'marks_awarded',
+        'feedback',
         'created_by',
         'updated_by'
     ];

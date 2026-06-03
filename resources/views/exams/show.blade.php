@@ -64,6 +64,25 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
+                                                <label class="form-label fw-bold">Duration</label>
+                                                <p class="form-control-plaintext">{{ $exam->duration ? $exam->duration . ' minutes' : 'Unlimited' }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <!-- Empty column -->
+                                        </div>
+                                    </div>
+
+                                    @if($exam->description)
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Description</label>
+                                            <p class="form-control-plaintext" style="white-space: pre-line;">{{ $exam->description }}</p>
+                                        </div>
+                                    @endif
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
                                                 <label class="form-label fw-bold">Status</label>
                                                 <div>
                                                     <span class="badge {{ $exam->status_badge_class }} fs-6">

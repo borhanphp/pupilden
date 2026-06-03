@@ -63,6 +63,7 @@ class AIExamGradingController extends Controller
             $answer->update([
                 'marks_awarded' => $gradingResult['marks_awarded'],
                 'is_correct' => $gradingResult['is_correct'],
+                'feedback' => $gradingResult['feedback'] ?? null,
                 'updated_by' => $student->id
             ]);
 
@@ -98,7 +99,7 @@ class AIExamGradingController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'answer_ids' => 'required|array',
+                'answer_ids' => 'nullable|array',
                 'answer_ids.*' => 'required|exists:answers,id'
             ]);
 
@@ -118,10 +119,19 @@ class AIExamGradingController extends Controller
                 ->firstOrFail();
 
             // Get all answers
-            $answers = Answer::whereIn('id', $request->answer_ids)
-                ->where('attempt_id', $attemptId)
-                ->with('question')
-                ->get();
+            if ($request->has('answer_ids') && is_array($request->answer_ids)) {
+                $answers = Answer::whereIn('id', $request->answer_ids)
+                    ->where('attempt_id', $attemptId)
+                    ->with('question')
+                    ->get();
+            } else {
+                $answers = Answer::where('attempt_id', $attemptId)
+                    ->whereHas('question', function($q) {
+                        $q->where('type', 'short_answer');
+                    })
+                    ->with('question')
+                    ->get();
+            }
 
             $gradedAnswers = [];
 
@@ -133,6 +143,7 @@ class AIExamGradingController extends Controller
                     $answer->update([
                         'marks_awarded' => $gradingResult['marks_awarded'],
                         'is_correct' => $gradingResult['is_correct'],
+                        'feedback' => $gradingResult['feedback'] ?? null,
                         'updated_by' => $student->id
                     ]);
 

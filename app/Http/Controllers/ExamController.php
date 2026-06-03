@@ -83,6 +83,8 @@ class ExamController extends Controller
                 'title' => 'required|string|max:255',
                 'type' => 'required|in:pre_course,final_exam',
                 'pass_mark' => 'required|integer|min:0|max:100',
+                'description' => 'nullable|string',
+                'duration' => 'nullable|integer|min:1',
                 'is_published' => 'boolean'
             ]);
 
@@ -95,6 +97,8 @@ class ExamController extends Controller
                 'title' => $request->title,
                 'type' => $request->type,
                 'pass_mark' => $request->pass_mark,
+                'description' => $request->description,
+                'duration' => $request->duration,
                 'is_published' => $request->has('is_published'),
                 'created_by' => auth()->user()->id,
                 'updated_by' => auth()->user()->id,
@@ -171,6 +175,8 @@ class ExamController extends Controller
                 'title' => 'required|string|max:255',
                 'type' => 'required|in:pre_course,final_exam',
                 'pass_mark' => 'required|integer|min:0|max:100',
+                'description' => 'nullable|string',
+                'duration' => 'nullable|integer|min:1',
                 'is_published' => 'boolean'
             ]);
 
@@ -183,6 +189,8 @@ class ExamController extends Controller
                 'title' => $request->title,
                 'type' => $request->type,
                 'pass_mark' => $request->pass_mark,
+                'description' => $request->description,
+                'duration' => $request->duration,
                 'is_published' => $request->has('is_published'),
                 'updated_by' => auth()->user()->id,
             ]);

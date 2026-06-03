@@ -14,6 +14,8 @@ class Exam extends Model
         'title',
         'type',
         'pass_mark',
+        'description',
+        'duration',
         'is_published',
         'created_by',
         'updated_by'
@@ -21,6 +23,7 @@ class Exam extends Model
 
     protected $casts = [
         'pass_mark' => 'integer',
+        'duration' => 'integer',
         'is_published' => 'boolean',
     ];
 
